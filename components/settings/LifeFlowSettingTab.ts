@@ -21,23 +21,20 @@ export class LifeFlowSettingTab extends PluginSettingTab {
         containerEl.createEl('p', { text: t('settings.tomlDescription'), cls: 'setting-item-description' });
         
         // TOML格式示例
-        const tomlExample = `[detail]
+        const tomlExample = `name = "Practice Coding"
 
-[[detail.stories]]
-name = "完成项目报告"
-date = "2025-01-01"
-time_start = "09:00"
-time_end = "17:00"
-description = "整理项目文档，准备汇报材料"
-address = { name = "办公室" }
+[detail]
+start_time = "2025-07-17 13:09"
+end_time = "2025-07-17 14:21"
+address = { name = "Beach" }
+description = "Explored new places"
 
-[[detail.stories]]
-name = "学习新技术"
-date = "2025-01-01"
-time_start = "19:00"
-time_end = "21:00"
-description = "学习React和TypeScript，完成练习项目"
-address = { name = "家里" }`;
+[detail.address]
+name = "小米之家(天洋广场店)"
+address = "燕郊镇天洋广场c馆一层小米之家"
+longitude = 116.821768
+latitude = 39.964811
+coordinate_system = "GCJ-02"`;
         
         containerEl.createEl('p', { text: t('settings.tomlExample'), cls: 'setting-item-description' });
         containerEl.createEl('pre', { text: tomlExample, cls: 'setting-item-description' });
@@ -47,6 +44,7 @@ address = { name = "家里" }`;
         containerEl.createEl('ul', { cls: 'setting-item-description' }, (ul) => {
             ul.createEl('li', { text: t('settings.usage.openView') });
             ul.createEl('li', { text: t('settings.usage.dataFormat') });
+            ul.createEl('li', { text: t('settings.usage.mapFeature') });
         });
 
         // 通用设置放在顶部，不添加标题
@@ -85,14 +83,14 @@ address = { name = "家里" }`;
                 }));
 
         // 地图设置分组
-        containerEl.createEl('h3', { text: 'Map settings' });
+        containerEl.createEl('h3', { text: t('settings.map.title') });
         
         new Setting(containerEl)
-            .setName('Map API provider')
-            .setDesc('Choose a map service provider for address selection and coordinate conversion')
+            .setName(t('settings.map.provider.name'))
+            .setDesc(t('settings.map.provider.desc'))
             .addDropdown((dropdown: any) => dropdown
-                .addOption('none', 'None')
-                .addOption('gaode', '高德')
+                .addOption('none', t('settings.map.provider.option.none'))
+                .addOption('gaode', t('settings.map.provider.option.gaode'))
                 .setValue(this.plugin.settings.mapApiProvider || 'none')
                 .onChange(async (value: string) => {
                     this.plugin.settings.mapApiProvider = value as 'none' | 'gaode';
@@ -104,10 +102,10 @@ address = { name = "家里" }`;
         // 只有选择高德时才显示高德Web服务Key设置
         if (this.plugin.settings.mapApiProvider === 'gaode') {
             new Setting(containerEl)
-                .setName('Gaode web service key')
-                .setDesc('API key for Gaode map web services, used for address search and coordinate conversion')
+                .setName(t('settings.map.gaodeKey.name'))
+                .setDesc(t('settings.map.gaodeKey.desc'))
                 .addText((text: any) => text
-                    .setPlaceholder('Enter your Gaode web service key')
+                    .setPlaceholder(t('settings.map.gaodeKey.placeholder'))
                     .setValue(this.plugin.settings.gaodeWebServiceKey || '')
                     .onChange(async (value: string) => {
                         this.plugin.settings.gaodeWebServiceKey = value?.trim() || '';

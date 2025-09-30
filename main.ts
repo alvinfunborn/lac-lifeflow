@@ -220,10 +220,16 @@ renders = ["lifeflow"]
 
     private async openWithFile(filePath: string) {
         try {
-            const file = this.app.vault.getAbstractFileByPath(filePath);
+            let file = this.app.vault.getAbstractFileByPath(filePath);
+            
+            // 如果文件不存在，自动创建演示数据
             if (!file || !(file instanceof TFile)) {
-                new Notice(t('notice.entryFileNotExist'), 5000);
-                return;
+                await this.createInitialData(filePath);
+                file = this.app.vault.getAbstractFileByPath(filePath);
+                if (!file || !(file instanceof TFile)) {
+                    new Notice(t('notice.entryFileNotExist'), 5000);
+                    return;
+                }
             }
             
             // 使用 Repository 的验证函数
@@ -240,6 +246,98 @@ renders = ["lifeflow"]
         } catch (e) {
             console.error('Failed to open file:', e);
             new Notice(t('notice.openFailed'), 5000);
+        }
+    }
+
+    private async createInitialData(filePath: string) {
+        try {
+            // 确保文件夹存在
+            const pathParts = filePath.split('/');
+            if (pathParts.length > 1) {
+                const folderPath = pathParts.slice(0, -1).join('/');
+                await this.ensureFolderExists(folderPath);
+            }
+
+            // 创建根文件
+            const sampleEntry = `type = "root"
+renders = ["lifeflow"]
+
+[[${t('main.sampleItem1')}]]
+[[${t('main.sampleItem2')}]]
+[[${t('main.sampleItem3')}]]
+`;
+            await this.app.vault.create(filePath, sampleEntry);
+
+            // 创建演示事件文件
+            const makeStoryToml = (name: string, startTime: string, endTime: string, address: string, description: string) => {
+                const lines: string[] = [];
+                lines.push(`name = "${name}"`);
+                lines.push('');
+                lines.push('[detail]');
+                lines.push(`start_time = "${startTime}"`);
+                lines.push(`end_time = "${endTime}"`);
+                lines.push(`address = { name = "${address}" }`);
+                lines.push(`description = "${description}"`);
+                lines.push('');
+                return lines.join('\n');
+            };
+
+            const storiesFolder = pathParts.length > 1 ? pathParts.slice(0, -1).join('/') : 'LaC/LifeFlow';
+            const today = new Date();
+            const todayString = today.toISOString().split('T')[0];
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayString = yesterday.toISOString().split('T')[0];
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowString = tomorrow.toISOString().split('T')[0];
+
+            // 创建演示事件文件
+            const sampleStories = [
+                {
+                    name: t('main.sampleItem1'),
+                    startTime: `${yesterdayString} 09:00:00`,
+                    endTime: '17:00:00',
+                    address: t('main.office'),
+                    description: t('main.completeProjectReport')
+                },
+                {
+                    name: t('main.sampleItem2'),
+                    startTime: `${todayString} 19:00:00`,
+                    endTime: '21:00:00',
+                    address: t('main.home'),
+                    description: t('main.learnNewTech')
+                },
+                {
+                    name: t('main.sampleItem3'),
+                    startTime: `${tomorrowString} 14:00:00`,
+                    endTime: '18:00:00',
+                    address: t('main.shoppingMall'),
+                    description: t('main.weekendShopping')
+                }
+            ];
+
+            for (const story of sampleStories) {
+                const storyFilePath = `${storiesFolder}/${story.name}.md`;
+                const storyContent = makeStoryToml(story.name, story.startTime, story.endTime, story.address, story.description);
+                await this.app.vault.create(storyFilePath, storyContent);
+            }
+
+            new Notice(t('notice.initialDataCreated'), 3000);
+        } catch (e) {
+            console.error('Failed to create initial data:', e);
+            new Notice(t('notice.createInitialDataFailed'), 5000);
+        }
+    }
+
+    private async ensureFolderExists(folderPath: string) {
+        try {
+            const folder = this.app.vault.getAbstractFileByPath(folderPath);
+            if (!folder) {
+                await this.app.vault.createFolder(folderPath);
+            }
+        } catch (e) {
+            console.error('Failed to create folder:', e);
         }
     }
 }

@@ -48,17 +48,20 @@ const dict: Dict = {
 	'notice.entryFileNotExist': { zh: '入口文件不存在', en: 'Entry file does not exist' },
 	'notice.invalidTomlFormat': { zh: '文件必须是有效的LifeFlow TOML格式，包含[detail]和[[detail.stories]]结构', en: 'File must be valid LifeFlow TOML format with [detail] and [[detail.stories]] structure' },
 	'notice.openFailed': { zh: '打开失败', en: 'Open failed' },
+	'notice.initialDataCreated': { zh: '已创建初始演示数据', en: 'Initial demo data created' },
+	'notice.createInitialDataFailed': { zh: '创建初始数据失败', en: 'Failed to create initial data' },
 	'notice.writeFailed': { zh: '写入 lifeflow.md 失败', en: 'Failed to write lifeflow.md' },
 	'notice.saveFailed': { zh: '保存失败', en: 'Save failed' },
 
 	// Settings
 	'settings.title': { zh: 'LaC.LifeFlow 设置', en: 'LaC.LifeFlow Settings' },
 	'settings.description': { zh: 'LaC.LifeFlow 是一个生活流水记录插件，用于记录和管理日常事件。', en: 'LaC.LifeFlow is a life flow recording plugin for recording and managing daily events.' },
-	'settings.tomlDescription': { zh: '入口文件应包含 TOML 格式的数据，用于存储生活流水记录。', en: 'Entry file should contain TOML format data for storing life flow records.' },
+	'settings.tomlDescription': { zh: '根文件包含事件引用列表，每个事件文件包含具体的TOML格式数据。', en: 'Root file contains event references, each event file contains specific TOML format data.' },
 	'settings.tomlExample': { zh: 'TOML 格式示例：', en: 'TOML format example:' },
 	'settings.usage': { zh: '使用说明：', en: 'Usage instructions:' },
 	'settings.usage.openView': { zh: '打开视图：按 Ctrl+P 搜索"LaC.LifeFlow: Open"命令，或在 Markdown 文件右键菜单中选择"用 LaC.LifeFlow 打开"', en: 'Open view: Press Ctrl+P to search for "LaC.LifeFlow: Open" command, or right-click on Markdown file and select "Open with LaC.LifeFlow"' },
-	'settings.usage.dataFormat': { zh: '数据格式：确保入口文件包含正确的 TOML 格式，否则会显示错误提示', en: 'Data format: Ensure entry file contains correct TOML format, otherwise error message will be shown' },
+	'settings.usage.dataFormat': { zh: '数据格式：根文件包含事件引用列表，每个事件文件包含具体的TOML格式数据', en: 'Data format: Root file contains event references, each event file contains specific TOML format data' },
+	'settings.usage.mapFeature': { zh: '地图功能：配置高德地图API密钥后，可以在编辑事件时选择地址位置', en: 'Map feature: After configuring Gaode map API key, you can select address location when editing events' },
 	'settings.entryFile.name': { zh: '入口文件', en: 'Entry file' },
 	'settings.entryFile.desc': { zh: 'LifeFlow 数据文件的路径', en: 'Path to LifeFlow data file' },
 	'settings.contextMenu.name': { zh: '启用右键菜单', en: 'Enable context menu' },
@@ -68,6 +71,16 @@ const dict: Dict = {
 	'settings.locale.option.auto': { zh: '自动检测', en: 'Auto detect' },
 	'settings.locale.option.zh': { zh: '中文', en: 'Chinese' },
 	'settings.locale.option.en': { zh: 'English', en: 'English' },
+
+	// Map settings
+	'settings.map.title': { zh: '地图设置', en: 'Map Settings' },
+	'settings.map.provider.name': { zh: '地图API提供商', en: 'Map API Provider' },
+	'settings.map.provider.desc': { zh: '选择地图服务提供商，用于地址搜索和坐标转换', en: 'Choose a map service provider for address search and coordinate conversion' },
+	'settings.map.provider.option.none': { zh: '无', en: 'None' },
+	'settings.map.provider.option.gaode': { zh: '高德', en: 'Amap' },
+	'settings.map.gaodeKey.name': { zh: '高德Web服务Key', en: 'Amap Web Service Key' },
+	'settings.map.gaodeKey.desc': { zh: '高德地图Web服务API密钥，用于地址搜索和坐标转换', en: 'API key for Amap map web services, used for address search and coordinate conversion' },
+	'settings.map.gaodeKey.placeholder': { zh: '请输入您的高德Web服务Key', en: 'Enter your Amap web service key' },
 
 	// Story form
 	'form.editStory': { zh: '编辑事项', en: 'Edit Story' },
