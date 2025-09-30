@@ -91,9 +91,3 @@ address = { name = "家里" }
 ## 许可证
 
 MIT License
-
-## todo
-1. 地图搜索国外
-1. 弹出搜索列表后如果有任何跟地图图层的交互(拖拽/点击/放大缩小), 则关闭搜索列表
-1. 地图选点显示address(search poi by coord)
-1. 保存story bug

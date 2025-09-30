@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapSelectorProps, MapLocation, MapSearchResult, AMapLocation, AMapSearchResult } from '../../types/map';
 import { LifeFlowSettings } from '../../types';
 import { loadAMapAPI, searchPlacesByWebAPI, createAmapConfig } from './Amap';
+import { t } from '../../i18n';
 
 export default function MapSelector({
   visible,
   initialLocation,
   onCancel,
   onConfirm,
-  title = '选择地点',
-  placeholder = '搜索地点...',
+  title = t('map.title'),
+  placeholder = t('map.placeholder'),
   settings
 }: MapSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,32 +88,63 @@ export default function MapSelector({
 
           mapInstanceRef.current = map;
           
-          // 地图加载完成后，如果有初始位置且需要坐标转换，进行转换
+          // 处理初始位置
           if (initialLocation && initialLocation.longitude && initialLocation.latitude) {
             const coordSystem = initialLocation.coordinate_system || 'WGS84';
             
             // 如果不是GCJ-02，需要转换坐标
             if (coordSystem.toLowerCase() !== 'gcj-02' && coordSystem.toLowerCase() !== 'gcj02') {
-              import('../../components/map/Amap').then(({ CoordinateConverter }) => {
-                CoordinateConverter.convertToGcj02(
+              try {
+                const { CoordinateConverter } = await import('../../components/map/Amap');
+                const [gcjLng, gcjLat] = await CoordinateConverter.convertToGcj02(
                   initialLocation.longitude!, 
                   initialLocation.latitude!, 
                   coordSystem,
                   settings.gaodeWebServiceKey || ''
-                ).then(([gcjLng, gcjLat]) => {
-                  console.log(`坐标转换成功: ${initialLocation.longitude}, ${initialLocation.latitude} -> ${gcjLng}, ${gcjLat}`);
-                  // 更新地图中心点
-                  map.setCenter([gcjLng, gcjLat]);
-                  map.setZoom(16);
-                  
-                  // 更新标记位置
-                  if (markerRef.current) {
-                    markerRef.current.setPosition([gcjLng, gcjLat]);
-                  }
-                }).catch((error) => {
-                  console.warn('坐标转换失败，使用原坐标:', error);
+                );
+                console.log(`坐标转换成功: ${initialLocation.longitude}, ${initialLocation.latitude} -> ${gcjLng}, ${gcjLat}`);
+                
+                // 设置地图中心点和缩放级别
+                map.setCenter([gcjLng, gcjLat]);
+                map.setZoom(16);
+                
+                // 创建标记
+                const marker = new AMap.Marker({
+                  position: [gcjLng, gcjLat],
+                  title: initialLocation.name || t('map.selectedLocation'),
+                  content: '<div class="lf-map-marker">📍</div>',
+                  anchor: 'bottom-center'
                 });
+                map.add(marker);
+                markerRef.current = marker;
+              } catch (error) {
+                console.warn('坐标转换失败，使用原坐标:', error);
+                // 使用原坐标
+                map.setCenter([initialLocation.longitude!, initialLocation.latitude!]);
+                map.setZoom(16);
+                
+                const marker = new AMap.Marker({
+                  position: [initialLocation.longitude!, initialLocation.latitude!],
+                  title: initialLocation.name || t('map.selectedLocation'),
+                  content: '<div class="lf-map-marker">📍</div>',
+                  anchor: 'bottom-center'
+                });
+                map.add(marker);
+                markerRef.current = marker;
+              }
+            } else {
+              // 已经是GCJ-02坐标，直接使用
+              map.setCenter([initialLocation.longitude!, initialLocation.latitude!]);
+              map.setZoom(16);
+              
+              const marker = new AMap.Marker({
+                position: [initialLocation.longitude!, initialLocation.latitude!],
+                title: initialLocation.name || t('map.selectedLocation'),
+                content: '<div class="lf-map-marker">📍</div>',
+                anchor: 'bottom-center'
               });
+              map.add(marker);
+              markerRef.current = marker;
             }
           }
           
@@ -137,21 +169,6 @@ export default function MapSelector({
               mapInstanceRef.current.getSize();
             }
           }, 200);
-          
-          // 不再使用PlaceSearch插件，改用Web API搜索
-
-          // 创建标记
-          if (initialLocation && initialLocation.longitude && initialLocation.latitude) {
-            // 先使用原坐标创建标记，如果需要转换会在后面更新
-            const marker = new AMap.Marker({
-              position: [initialLocation.longitude, initialLocation.latitude],
-              title: initialLocation.name || '选中位置',
-              content: '<div style="background: transparent; color: red; font-size: 20px; display: flex; align-items: center; justify-content: center; padding-bottom: 0; margin-bottom: -5px;">📍</div>',
-              anchor: 'bottom-center'
-            });
-            map.add(marker);
-            markerRef.current = marker;
-          }
 
           // 地图交互事件 - 不再自动关闭搜索列表
 
@@ -165,7 +182,7 @@ export default function MapSelector({
                 if (location) {
                   // 更新选中位置和搜索输入框
                   setSelectedLocation(location);
-                  setSearchQuery(location.name || '选中位置');
+                  setSearchQuery(location.name || t('map.selectedLocation'));
                   
                   // 关闭搜索结果列表
                   setSearchResults([]);
@@ -176,10 +193,10 @@ export default function MapSelector({
                   const defaultLocation: MapLocation = {
                     longitude: lng,
                     latitude: lat,
-                    name: '选中位置'
+                    name: t('map.selectedLocation')
                   };
                   setSelectedLocation(defaultLocation);
-                  setSearchQuery('选中位置');
+                  setSearchQuery(t('map.selectedLocation'));
                   setSearchResults([]);
                 }
               });
@@ -191,8 +208,8 @@ export default function MapSelector({
             } else {
               const marker = new AMap.Marker({
                 position: [lng, lat],
-                title: '选中位置',
-                content: '<div style="background: transparent; color: red; font-size: 20px; display: flex; align-items: center; justify-content: center; padding-bottom: 0; margin-bottom: -5px;">📍</div>',
+                title: t('map.selectedLocation'),
+                content: '<div class="lf-map-marker">📍</div>',
                 anchor: 'bottom-center'
               });
               map.add(marker);
@@ -264,7 +281,7 @@ export default function MapSelector({
       } else {
         setSearchResults([]);
         hasSearchResultsRef.current = false;
-        setSearchError('未找到相关地点，请尝试其他关键词');
+        setSearchError(t('map.noResults'));
         
         // 清除搜索结果标记
         if (mapInstanceRef.current) {
@@ -278,7 +295,7 @@ export default function MapSelector({
       }
     } catch (error) {
       console.error('Search failed:', error);
-      setSearchError('搜索失败，请重试');
+      setSearchError(t('map.searchFailed'));
       setSearchResults([]);
       hasSearchResultsRef.current = false;
     } finally {
@@ -393,7 +410,7 @@ export default function MapSelector({
         const marker = new AMap.Marker({
           position: [result.location.longitude, result.location.latitude],
           title: result.name,
-          content: '<div style="background: transparent; color: red; font-size: 20px; display: flex; align-items: center; justify-content: center; padding-bottom: 0; margin-bottom: -5px;">📍</div>',
+          content: '<div class="lf-map-marker">📍</div>',
           anchor: 'bottom-center'
         });
         mapInstanceRef.current.add(marker);
@@ -487,7 +504,7 @@ export default function MapSelector({
           />
           {!mapLoaded && (
             <div className="lf-map-loading">
-              <div className="lf-map-loading-text">地图加载中...</div>
+              <div className="lf-map-loading-text">{t('map.loading')}</div>
             </div>
           )}
         </div>
@@ -530,7 +547,7 @@ export default function MapSelector({
                   }
                 }}
                 className="lf-map-search-btn"
-                title="关闭搜索结果"
+                title={t('map.closeResults')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -541,7 +558,7 @@ export default function MapSelector({
                 onClick={handleSearch}
                 disabled={isSearching || !searchQuery.trim()}
                 className="lf-map-search-btn"
-                title={isSearching ? '搜索中...' : '搜索'}
+                title={isSearching ? t('map.searching') : t('map.search')}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -587,16 +604,16 @@ export default function MapSelector({
         {/* 底部操作按钮 */}
         <div className="lf-map-bottom-controls">
           <button className="lf-btn lf-btn-cancel" onClick={onCancel}>
-            取消
+            {t('map.cancel')}
           </button>
           {/* <button className="lf-btn lf-btn-clear" onClick={handleClear}>
-            清除
+            {t('map.clear')}
           </button> */}
           <button 
             className="lf-btn lf-btn-confirm" 
             onClick={handleConfirm}
           >
-            确认
+            {t('map.confirm')}
           </button>
         </div>
       </div>

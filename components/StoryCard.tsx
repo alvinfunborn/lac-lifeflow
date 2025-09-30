@@ -44,7 +44,7 @@ export default function StoryCard({
   onEndReorder
 }: StoryCardProps) {
   const [isLongPressing, setIsLongPressing] = useState(false);
-  const longPressTimer = useRef(null as any);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const isUnplanned = !story.date;
 
   // 长按检测
@@ -238,7 +238,7 @@ export default function StoryCard({
             )}
           </div>
           {story.address && (
-            <span className='address-text'>🧷 {story.address.name}</span>
+            <span className='address-text'>📍 {story.address.name}</span>
           )}
         </div>
       )}
@@ -249,7 +249,7 @@ export default function StoryCard({
           <div className='datetime'>
             <span className='date-text'>~</span>
           </div>
-          <span className='address-text'>🧷 {story.address.name}</span>
+          <span className='address-text'>📍 {story.address.name}</span>
         </div>
       )}
       

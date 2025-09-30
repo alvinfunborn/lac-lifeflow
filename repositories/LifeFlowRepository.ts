@@ -52,10 +52,10 @@ export class LifeFlowRepository {
             
             const tomlHeader = tomlLines.join('\n');
             const parsed = this.parseToml(tomlHeader) || {};
-            const typeVal = String((parsed as any)['type'] ?? '').toLowerCase();
-            let renders: any = (parsed as any)['renders'];
+            const typeVal = String((parsed as Record<string, unknown>)['type'] ?? '').toLowerCase();
+            let renders: unknown[] = (parsed as Record<string, unknown>)['renders'] as unknown[] || [];
             if (!Array.isArray(renders)) renders = typeof renders === 'string' ? [renders] : [];
-            const hasLifeflow = (renders as any[]).map(v => String(v).toLowerCase()).some(s => s.includes('lifeflow'));
+            const hasLifeflow = renders.map(v => String(v).toLowerCase()).some(s => s.includes('lifeflow'));
             return typeVal === 'root' && hasLifeflow;
         } catch (_) {
             return false;
@@ -84,7 +84,7 @@ export class LifeFlowRepository {
             for (const target of linkTargets) {
                 let file: TFile | null = null;
                 try {
-                    const dest = (this.app as any).metadataCache.getFirstLinkpathDest(target, this.rootFilePath);
+                    const dest = this.app.metadataCache.getFirstLinkpathDest(target, this.rootFilePath);
                     file = dest && dest instanceof TFile ? dest : null;
                 } catch (_) {
                     file = null;

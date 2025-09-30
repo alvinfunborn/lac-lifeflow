@@ -68,7 +68,7 @@ export function processStoriesWithDistance(stories: Story[]): StoryWithDistance[
   for (const s of datedStoriesForGrouping) {
     const d = s.date!;
     if (!dateToStories.has(d)) dateToStories.set(d, []);
-    (dateToStories.get(d) as any[]).push(s);
+    dateToStories.get(d)!.push(s);
   }
 
   // 构建“每个日期内”的有序列表

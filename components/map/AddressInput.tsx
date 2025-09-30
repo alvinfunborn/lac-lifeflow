@@ -1,5 +1,6 @@
 import React from 'react';
 import type { MapLocation } from '../../types/map';
+import { t } from '../../i18n';
 
 interface AddressInputProps {
   value: string;
@@ -13,7 +14,7 @@ export default function AddressInput({
   value,
   onChange,
   onMapClick,
-  placeholder = '请输入地址...',
+  placeholder = t('map.addressPlaceholder'),
   className = ''
 }: AddressInputProps) {
   return (

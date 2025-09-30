@@ -43,6 +43,7 @@ const jsContext = await esbuild.context({
 	treeShaking: true,
 	outfile: "main.js",
 	minify: prod,
+	platform: "node",
 });
 
 // 构建 CSS：编译 SCSS 入口并输出到插件根目录 styles.css（Obsidian 会自动加载）

@@ -34,10 +34,10 @@ export default function TimePicker({ visible, value, onCancel, onClear, onConfir
   const hourLoop: number[] = [...hours, ...hours, ...hours];
   const minuteLoop: number[] = [...minutes, ...minutes, ...minutes];
 
-  const hourRef = useRef(null as any);
-  const minuteRef = useRef(null as any);
+  const hourRef = useRef<HTMLDivElement | null>(null);
+  const minuteRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToSelected = (ref: any, index: number, total: number) => {
+  const scrollToSelected = (ref: React.RefObject<HTMLDivElement>, index: number, total: number) => {
     const container = ref.current;
     if (!container) return;
     const itemHeight = 36;
@@ -47,7 +47,7 @@ export default function TimePicker({ visible, value, onCancel, onClear, onConfir
     // 放到中间段的对应索引
     const baseIndex = total + index;
     const target = paddingTop + itemHeight * baseIndex - centerOffset;
-    container.scrollTo({ top: Math.max(0, target), behavior: 'instant' as any });
+    container.scrollTo({ top: Math.max(0, target), behavior: 'auto' });
   };
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function TimePicker({ visible, value, onCancel, onClear, onConfir
     if (rawIndex > segmentEnd) normalized -= total;
     if (normalized !== rawIndex) {
       const target = paddingTop + normalized * itemHeight - centerOffset;
-      container.scrollTo({ top: target, behavior: 'instant' as any });
+      container.scrollTo({ top: target, behavior: 'auto' });
     }
   };
 

@@ -121,7 +121,7 @@ const dict: Dict = {
 	'form.error.timeRangeInvalid': { zh: '时间范围无效', en: 'Invalid time range' },
 
 	// Search
-	'search.placeholder': { zh: '搜索故事...', en: 'Search stories...' },
+	'search.placeholder': { zh: '搜索事件...', en: 'Search stories...' },
 	'search.title': { zh: '搜索事件', en: 'Search events' },
 	'search.clear': { zh: '清除搜索', en: 'Clear search' },
 	'search.noResults': { zh: '没有找到匹配的故事', en: 'No matching stories found' },
@@ -153,6 +153,26 @@ const dict: Dict = {
 	
 	// Repository notices
 	'notice.nameExists': { zh: '名称已存在，请使用其他名称', en: 'Name already exists, please use a different name' },
+	
+	// Map components
+	'map.title': { zh: '选择地点', en: 'Select Location' },
+	'map.placeholder': { zh: '搜索地点...', en: 'Search places...' },
+	'map.addressPlaceholder': { zh: '请输入地址...', en: 'Enter address...' },
+	'map.loading': { zh: '地图加载中...', en: 'Loading map...' },
+	'map.cancel': { zh: '取消', en: 'Cancel' },
+	'map.confirm': { zh: '确认', en: 'Confirm' },
+	'map.clear': { zh: '清除', en: 'Clear' },
+	'map.closeResults': { zh: '关闭搜索结果', en: 'Close search results' },
+	'map.searching': { zh: '搜索中...', en: 'Searching...' },
+	'map.search': { zh: '搜索', en: 'Search' },
+	'map.noResults': { zh: '未找到相关地点，请尝试其他关键词', en: 'No places found, please try other keywords' },
+	'map.searchFailed': { zh: '搜索失败，请重试', en: 'Search failed, please try again' },
+	'map.selectedLocation': { zh: '选中位置', en: 'Selected location' },
+	'map.clearConfirm': { zh: '确定要清除地址吗？', en: 'Are you sure to clear the address?' },
+	'map.clearConfirmTitle': { zh: '清除地址', en: 'Clear Address' },
+	'map.clearConfirmMessage': { zh: '此操作将清除当前选中的地址信息，确定要继续吗？', en: 'This will clear the currently selected address information. Are you sure to continue?' },
+	'map.clearConfirmCancel': { zh: '取消', en: 'Cancel' },
+	'map.clearConfirmConfirm': { zh: '确定清除', en: 'Confirm Clear' },
 };
 
 function formatVars(input: string, vars?: Record<string, string | number>): string {
@@ -164,6 +184,6 @@ export function t(key: string, vars?: Record<string, string | number>, locale?: 
 	const lang = locale || currentLocale;
     const entry = (dict as Record<string, { zh: string; en: string }>)[key];
 	if (!entry) return key;
-    const raw = (entry as any)[lang] ?? entry.en ?? key;
+    const raw = entry[lang] ?? entry.en ?? key;
 	return formatVars(raw, vars);
 }

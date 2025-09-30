@@ -45,11 +45,11 @@ export default function DatePicker({ visible, value, onCancel, onClear, onConfir
 
   useEffect(() => { setDay((prevDay: number) => clamp(prevDay, 1, daysInMonth)); }, [daysInMonth]);
 
-  const yearRef = useRef(null as any);
-  const monthRef = useRef(null as any);
-  const dayRef = useRef(null as any);
+  const yearRef = useRef<HTMLDivElement | null>(null);
+  const monthRef = useRef<HTMLDivElement | null>(null);
+  const dayRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToSelected = (ref: any, index: number, total?: number) => {
+  const scrollToSelected = (ref: React.RefObject<HTMLDivElement>, index: number, total?: number) => {
     const container = ref.current;
     if (!container) return;
     const itemHeight = 36; // 与 CSS 保持一致
@@ -58,7 +58,7 @@ export default function DatePicker({ visible, value, onCancel, onClear, onConfir
     const centerOffset = (container.clientHeight - itemHeight) / 2;
     const baseIndex = total && total > 0 ? (total + index) : index; // 循环列滚到中间段
     const target = paddingTop + itemHeight * baseIndex - centerOffset;
-    container.scrollTo({ top: Math.max(0, target), behavior: 'instant' as any });
+    container.scrollTo({ top: Math.max(0, target), behavior: 'auto' });
   };
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function DatePicker({ visible, value, onCancel, onClear, onConfir
     if (rawIndex > segmentEnd) normalized -= total;
     if (normalized !== rawIndex) {
       const target = paddingTop + normalized * itemHeight - centerOffset;
-      container.scrollTo({ top: target, behavior: 'instant' as any });
+      container.scrollTo({ top: target, behavior: 'auto' });
     }
   };
 

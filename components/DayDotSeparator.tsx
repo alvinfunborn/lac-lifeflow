@@ -28,7 +28,7 @@ export default function DayDotSeparator({ count }: DayDotSeparatorProps) {
     recompute();
 
     let ro: ResizeObserver | null = null;
-    if (typeof (window as any).ResizeObserver !== 'undefined') {
+    if (typeof window.ResizeObserver !== 'undefined') {
       ro = new ResizeObserver(() => recompute());
       ro.observe(el);
     } else {

@@ -4,7 +4,7 @@
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
-    "target": "ES6",
+    "target": "ES2018",
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
@@ -17,12 +17,18 @@
     "jsx": "react-jsx",
     "lib": [
       "DOM",
-      "ES2017"
-    ]
+      "ES2018"
+    ],
+    "skipLibCheck": true,
+    "noEmit": true
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "types/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "main.js"
   ]
 }

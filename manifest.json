@@ -3,10 +3,12 @@
     "name": "LaC.LifeFlow",
     "version": "1.0.0",
     "minAppVersion": "1.6.0",
-    "description": "Life as Code - LifeFlow 事项时间线插件",
+    "description": "Life as Code - LifeFlow: a timeline plugin to manage and display your life events in a timeline view.",
     "author": "alvinfunborn",
     "authorUrl": "https://github.com/alvinfunborn",
     "fundingUrl": "",
     "isDesktopOnly": false,
-    "tags": ["timeline", "life-tracking", "productivity", "organization"]
+    "tags": ["timeline", "life-tracking", "productivity", "organization"],
+    "js": "main.js",
+    "css": "styles.css"
 }

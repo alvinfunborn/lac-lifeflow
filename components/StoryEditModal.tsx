@@ -32,7 +32,7 @@ export default function StoryEditModal({
   const [formData, setFormData] = useState({} as Partial<StoryWithDistance>);
   const [nameError, setNameError] = useState('');
   const [timeError, setTimeError] = useState('');
-  const nameInputRef = useRef(null as any);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
   const [datePickerVisibleFor, setDatePickerVisibleFor] = useState(null as null | 'start' | 'end');
   const [timePickerVisibleFor, setTimePickerVisibleFor] = useState(null as null | 'start' | 'end');
   const [mapSelectorVisible, setMapSelectorVisible] = useState(false);
@@ -250,7 +250,7 @@ export default function StoryEditModal({
               value={formData.name || ''}
               placeholder={t('form.name.placeholder')}
               ref={nameInputRef}
-              className={nameError ? 'lf-input-error' : undefined as any}
+              className={nameError ? 'lf-input-error' : undefined}
               onChange={(e) => { setNameError(''); handleInputChange('name', e.target.value); }}
             />
             {nameError && (<div className='lf-field-error'>

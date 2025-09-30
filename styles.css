@@ -672,6 +672,7 @@
   background: rgba(255, 255, 255, 0.95);
   padding: 12px;
   border-radius: 12px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -772,7 +773,7 @@
   padding: 0;
   margin: 2px 0 0 0;
   /* 隐藏滚动条但保持滚动功能 */
-  scrollbar-width: none; /* Firefox */
+  /* scrollbar-width: none; */ /* Limited browser support */ /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 }
 .lf-map-search-results::-webkit-scrollbar {
@@ -855,6 +856,18 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 地图标记样式 */
+.lf-map-marker {
+  background: transparent;
+  color: red;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 0;
+  margin-bottom: -5px;
 }
 
 /* 地图容器样式 - 已移除，地图现在直接作为背景 */
@@ -989,6 +1002,15 @@
 .lf-map-selector-actions .lf-btn-cancel:hover {
   background: #F5F5F5;
   border-color: #c9c9c9;
+}
+
+.lf-map-selector-actions .lf-btn-confirm {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.lf-map-selector-actions .lf-btn-confirm:hover:not(:disabled) {
+  background: var(--interactive-accent-hover);
 }
 
 .lf-map-selector-actions .lf-btn-confirm:disabled {
@@ -1547,7 +1569,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 110px 0; /* 让选中项居中 */
-  -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
+  /* -webkit-overflow-scrolling: touch; */ /* Deprecated */ /* iOS 平滑滚动 */
 }
 
 .lf-wheel-items::-webkit-scrollbar {

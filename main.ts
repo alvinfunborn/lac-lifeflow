@@ -23,10 +23,8 @@ class LifeFlowView extends ItemView {
     getDisplayText() { return 'LaC.LifeFlow'; }
 
     async onOpen() {
-        (this.containerEl as any).empty?.();
-        this.rootEl = (this.containerEl as any).createDiv
-            ? (this.containerEl as any).createDiv({ cls: 'lac-lifeflow-root' })
-            : (this.containerEl as HTMLElement);
+        this.containerEl.empty();
+        this.rootEl = this.containerEl.createDiv({ cls: 'lac-lifeflow-root' });
         if (this.rootEl) {
             this.reactRoot = createRoot(this.rootEl);
             
@@ -80,10 +78,10 @@ export default class LifeFlowPlugin extends Plugin {
         // 不再在布局恢复后主动分离该视图
 
         this.registerEvent(
-            this.app.workspace.on('file-menu', (menu: any, file: any) => {
+            this.app.workspace.on('file-menu', (menu, file) => {
                 if (!this.settings.enableContextMenu) return;
                 if (file instanceof TFile && file.extension === 'md') {
-                    menu.addItem((item: any) => {
+                    menu.addItem((item) => {
                         item
                             .setTitle(t('menu.openWith'))
                             .setIcon('calendar-with-checkmark')
@@ -112,12 +110,8 @@ export default class LifeFlowPlugin extends Plugin {
                 const parts = entryPath.split('/');
                 const folderPath = parts.slice(0, -1).join('/') || '';
                 const storiesFolder = folderPath || 'LaC/LifeFlow';
-                console.log('🔍 [main.ts] 检查入口文件:', entryPath, '存在:', !!entryFile, '已初始化:', this.hasInitialized);
                 
                 if (!entryFile) {
-                    console.log('🆕 [main.ts] 入口文件不存在，检查是否已初始化');
-                    console.log('🔍 [main.ts] 入口文件不存在原因:', { entryPath, entryFile: !!entryFile, hasInitialized: this.hasInitialized });
-                    
                     // 检查是否已经存在stories文件，如果存在则不初始化
                     const existingStories = this.app.vault.getMarkdownFiles().filter(file => 
                         file.path.includes('LaC/LifeFlow') && 
@@ -125,7 +119,6 @@ export default class LifeFlowPlugin extends Plugin {
                     );
                     
                     if (existingStories.length === 0) {
-                        console.log('🆕 [main.ts] 开始初始化，创建入口文件和示例文件');
                         this.hasInitialized = true;
                     if (folderPath) await ensureFolderExists(folderPath);
 
@@ -192,14 +185,9 @@ renders = ["lifeflow"]
                     for (const story of sampleStories) {
                         const storyPath = `${storiesFolder}/${story.name}.md`;
                         const storyContent = makeStoryToml(story.name, story.startTime, story.endTime, story.address, story.description);
-                        console.log('🆕 [main.ts] 创建示例文件:', storyPath);
                         await this.app.vault.create(storyPath, storyContent);
                     }
-                    } else {
-                        console.log('⚠️ [main.ts] 已存在story文件，跳过初始化');
                     }
-                } else {
-                    console.log('✅ [main.ts] 入口文件已存在，无需初始化');
                 }
                 
                 // 注意：不再自动迁移，让用户手动重命名需要的文件
@@ -218,8 +206,6 @@ renders = ["lifeflow"]
     }
 
     onunload() {
-        // 清理资源
-        this.app.workspace.detachLeavesOfType(VIEW_TYPE);
     }
 
     async loadSettings() {
@@ -251,7 +237,8 @@ renders = ["lifeflow"]
             const leaf = this.app.workspace.getLeaf('tab');
             await leaf.setViewState({ type: VIEW_TYPE, state: { filePath: file.path }, active: true });
             this.app.workspace.revealLeaf(leaf);
-        } catch (e: any) {
+        } catch (e) {
+            console.error('Failed to open file:', e);
             new Notice(t('notice.openFailed'), 5000);
         }
     }
