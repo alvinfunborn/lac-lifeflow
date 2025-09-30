@@ -1,0 +1,705 @@
+@import '../../styles/variables.scss';
+
+/* 地图选择器样式 */
+.lf-map-selector-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  padding: 20px;
+}
+
+.lf-map-selector {
+  background: transparent;
+  color: #1a1a1a;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  height: 80vh;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e0e0e0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  /* 确保地图完全覆盖整个容器 */
+  isolation: isolate;
+}
+
+.lf-map-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.lf-map-selector-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.lf-map-selector-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.lf-map-selector-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* 地图背景层 */
+.lf-map-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  /* 确保地图完全覆盖，包括圆角区域 */
+  width: 100%;
+  height: 100%;
+}
+
+/* 顶部控制区域 */
+.lf-map-top-controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 底部控制区域 */
+.lf-map-bottom-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px;
+  border-radius: 12px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 搜索框样式 */
+.lf-map-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.lf-map-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 44px 0 16px;
+  font-size: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 0.2s ease;
+  position: relative;
+  z-index: 0;
+}
+
+.lf-map-search-input:focus {
+  border-color: #FFB612;
+  box-shadow: 0 0 0 2px rgba(255, 182, 18, 0.1);
+}
+
+.lf-map-search-input::placeholder {
+  color: #999;
+}
+
+.lf-map-search-btn {
+  position: absolute !important;
+  left: auto !important;
+  right: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: #666 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+.lf-map-search-btn:hover:not(:disabled) {
+  background: #f0f0f0 !important;
+  color: #333 !important;
+  transform: translateY(-50%) translateY(-1px) !important;
+}
+
+.lf-map-search-btn:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.98) !important;
+}
+
+.lf-map-search-btn:disabled {
+  background: transparent !important;
+  cursor: not-allowed !important;
+  color: #ccc !important;
+  transform: translateY(-50%) !important;
+}
+
+/* 搜索错误提示样式 */
+.lf-map-search-error {
+  padding: 8px 12px;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 6px;
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* 搜索结果样式 */
+.lf-map-search-results {
+  position: relative;
+  margin-top: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #FFFFFF;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  margin: 2px 0 0 0;
+  
+  /* 隐藏滚动条但保持滚动功能 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}
+
+.lf-map-search-result {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.lf-map-search-result:last-child {
+  border-bottom: none;
+}
+
+.lf-map-search-result:hover {
+  background: #f8f9fa;
+}
+
+/* 高亮样式已移动到 .lf-map-search-result-number 内部 */
+
+.lf-map-search-result-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.lf-map-search-result-address {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.lf-map-search-result-distance {
+  font-size: 11px;
+  color: #999;
+}
+
+.lf-map-search-result-number {
+  background: $packers-danger;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+  
+  &.lf-map-search-result-highlight {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba($packers-danger, 0.6);
+  }
+}
+
+.lf-map-search-result-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 地图标记编号样式 */
+.lf-map-marker-number {
+  background: $packers-danger;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* 地图容器样式 - 已移除，地图现在直接作为背景 */
+
+.lf-map-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  border-radius: 16px;
+  /* 确保地图完全覆盖容器 */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* 强制高德地图组件填满容器 */
+.lf-map-canvas .amap-container,
+.lf-map-canvas .amap-maps,
+.lf-map-canvas .amap-layers,
+.lf-map-canvas .amap-layer {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+/* 强制canvas元素填满容器 */
+.lf-map-canvas canvas.amap-layer {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+.lf-map-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.lf-map-loading-text {
+  color: #666;
+  font-size: 14px;
+}
+
+/* 选中位置信息样式 */
+.lf-map-selected-info {
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.lf-map-selected-title {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.lf-map-selected-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.lf-map-selected-coords {
+  font-size: 11px;
+  color: #999;
+  font-family: monospace;
+}
+
+/* 清除按钮样式 */
+.lf-map-clear-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #dc3545;
+  border-radius: 6px;
+  background: #dc3545;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.lf-map-clear-btn:hover {
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+  background: #fff2f0;
+}
+
+.lf-map-clear-btn:active {
+  transform: scale(0.95);
+}
+
+/* 操作按钮样式 */
+.lf-map-selector-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+  justify-content: center;
+}
+
+.lf-map-selector-actions .lf-btn {
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.lf-map-selector-actions .lf-btn-cancel {
+  background: #FFFFFF;
+  color: #203731;
+  border: 1px solid #d9d9d9;
+}
+
+.lf-map-selector-actions .lf-btn-cancel:hover {
+  background: #F5F5F5;
+  border-color: #c9c9c9;
+}
+
+.lf-map-selector-actions .lf-btn-confirm {
+  // background: $packers-gold !important;
+  // color: #FFFFFF !important;
+}
+
+.lf-map-selector-actions .lf-btn-confirm:hover:not(:disabled) {
+  // background: lighten($packers-gold, 10%) !important;
+}
+
+.lf-map-selector-actions .lf-btn-confirm:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.lf-map-selector-actions .lf-btn-clear {
+  background: $packers-danger !important;
+  color: #FFFFFF !important;
+  border: 1px solid $packers-danger !important;
+}
+
+.lf-map-selector-actions .lf-btn-clear:hover {
+  background: lighten($packers-danger, 10%) !important;
+  border-color: lighten($packers-danger, 10%) !important;
+}
+
+/* 地址输入组样式 - 用于集成到其他组件中 */
+.lf-address-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.lf-address-input {
+  flex: 1;
+  height: 38px;
+  padding: 8px 14px;
+  font-size: 14px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #1a1a1a;
+}
+
+.lf-address-input-clickable {
+  cursor: pointer;
+  background: #f8f9fa;
+}
+
+.lf-address-input-clickable:hover {
+  border-color: #FFB612;
+  background: #FFFBF0;
+}
+
+.lf-address-input-clickable:focus {
+  outline: none;
+  border-color: #FFB612;
+  box-shadow: 0 0 0 2px rgba(255, 182, 18, 0.1);
+}
+
+.lf-map-btn {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.lf-map-btn:hover {
+  border-color: #FFB612;
+  color: #FFB612;
+  background: #FFFBF0;
+}
+
+.lf-map-btn:active {
+  transform: scale(0.95);
+}
+
+/* 清除确认对话框样式 */
+.lf-map-clear-confirm {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10003;
+}
+
+.lf-map-clear-confirm-content {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid #e0e0e0;
+}
+
+.lf-map-clear-confirm-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.lf-map-clear-confirm-message {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.lf-map-clear-confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.lf-map-clear-confirm-actions .lf-btn {
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.lf-map-clear-confirm-actions .lf-btn-cancel {
+  background: #FFFFFF;
+  color: #203731;
+  border: 1px solid #d9d9d9;
+}
+
+.lf-map-clear-confirm-actions .lf-btn-cancel:hover {
+  background: #F5F5F5;
+  border-color: #c9c9c9;
+}
+
+.lf-map-clear-confirm-actions .lf-btn-confirm {
+  background: $packers-danger !important;
+  color: #FFFFFF !important;
+}
+
+.lf-map-clear-confirm-actions .lf-btn-confirm:hover:not(:disabled) {
+  background: lighten($packers-danger, 10%) !important;
+}
+
+.lf-map-clear-confirm-actions .lf-btn-confirm:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* 地址选择状态提示 */
+.lf-map-chosen-info {
+  margin: 12px 0;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+  
+  div {
+    color: #495057;
+    
+    &:nth-child(1) {
+      color: #198754; // 绿色
+      font-weight: 500;
+    }
+  }
+}
+
+.lf-map-chosen-info div:nth-child(1) {
+  color: #198754 !important; // 绿色
+  font-weight: 500;
+}
+
+// 通过JavaScript动态添加class来处理颜色
+.lf-map-chosen-info .lf-info-place {
+  color: #0d6efd !important; // 蓝色
+}
+
+.lf-map-chosen-info .lf-info-clear {
+  color: #dc3545 !important; // 红色
+}
+
+/* 增强按钮样式 */
+.lf-map-bottom-controls {
+  .lf-btn {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  
+  .lf-btn-clear {
+    background: $packers-danger !important;
+    color: #FFFFFF !important;
+    border: 1px solid $packers-danger !important;
+    
+    &:hover {
+      background: lighten($packers-danger, 10%) !important;
+      border-color: lighten($packers-danger, 10%) !important;
+    }
+  }
+  
+  .lf-btn-cancel {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    
+    &:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+    }
+  }
+  
+  .lf-btn-confirm {
+    background: #007bff;
+    color: #ffffff;
+    border: 1px solid #007bff;
+    
+    &:hover {
+      background: #0056b3;
+      border-color: #0056b3;
+    }
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .lf-map-selector-mask {
+    padding: 10px;
+  }
+  
+  .lf-map-selector {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+  
+  .lf-map-selector-content {
+    padding: 16px;
+  }
+  
+  .lf-map-search {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .lf-map-search-btn {
+    width: 100%;
+  }
+  
+  .lf-map-canvas {
+    height: 250px;
+  }
+}

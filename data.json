@@ -1,0 +1,12 @@
+{
+  "entryFile": "LaC/LifeFlow/lifeflow.md",
+  "enableContextMenu": true,
+  "locale": "en",
+  "mapApiProvider": "gaode",
+  "gaodeWebServiceKey": "dd49e2a8bd511bda3e17fb054b6a3b22",
+  "defaultIcon": "",
+  "defaultSort": "none",
+  "assetsFolder": "costset",
+  "rootFilePath": "costset/costset.md",
+  "autoSync": true
+}

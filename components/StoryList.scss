@@ -1,0 +1,116 @@
+@import '../styles/variables.scss';
+
+.story-list-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  padding-left: 10px;
+  padding-right: 50px; // 为右侧minimap留出空间（40px + 16px margin）
+  
+  .story-list {
+    height: 100%; // 内容区高度扣除父容器 padding
+    padding-top: 8px; // 顶部留白随内容滚动
+    background: #f8f9fb; // 略深的白色，避免纯白
+    overflow-x: hidden; // 防止左右滚动
+    
+    // 额外的底部占位，确保最后一项不被固定栏覆盖
+    &::after {
+      content: '';
+      display: block;
+      height: calc(300px + env(safe-area-inset-bottom, 0px));
+    }
+    
+    // 隐藏滚动条
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    
+    // 优化滚动性能
+    scroll-behavior: smooth;
+  }
+  
+  
+  // 循环滚动时的视觉提示
+  .story-wrapper {
+    transition: all 0.3s ease;
+    margin-bottom: 0;
+    margin-top: 0;
+    
+    // 循环标识（可选，用于调试）
+    &.cycle-indicator {
+      position: relative;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: $packers-gold;
+        opacity: 0.3;
+      }
+    }
+    &.same-day {
+      margin-top: -8px; // 实现重叠效果
+    }
+    // 新的一天第一条（无论是否有分隔符）增加顶部留白，区分天与天
+    &.day-start {
+      padding-top: 4px;
+    }
+    // 重排序状态下的story-wrapper
+    &.reordering {
+      position: relative;
+      z-index: 1010;
+    }
+  }
+  
+}
+
+// 重排序蒙版容器
+.reorder-mask-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  pointer-events: none; // 容器不拦截事件
+}
+
+// 重排序蒙版背景（专门处理点击退出）
+.reorder-mask-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3); // 半透明背景
+  cursor: pointer;
+  pointer-events: auto; // 专门处理点击退出
+  z-index: 1001; // 提高z-index，确保能处理点击
+}
+
+// 重排序模式下的卡片样式
+.story-card.reordering {
+  position: relative;
+  z-index: 1009; // 提高z-index，确保在蒙版之上
+  // 不放大卡片，避免被裁剪
+  // transform: scale(1.05);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  border: 3px solid $packers-gold; // 用金色边框突出显示
+}
+
+
+
+
+// 循环滚动动画
+@keyframes cycleScroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}

@@ -1,0 +1,277 @@
+@import '../styles/variables.scss';
+
+.story-card {
+  // 整体缩小一半（卡片与内部文字、内边距一起缩放）
+  zoom: 0.5;
+  @supports not (zoom: 1) {
+    transform: scale(0.5);
+    transform-origin: top left;
+  }
+  background: unset !important;
+  border-radius: 24px;
+  padding: 16px;
+  margin-bottom: 0;
+  box-shadow: 0 2px 8px rgba(32, 55, 49, 0.2);
+  border: 1px solid $packers-border;
+  transition: all 0.2s ease;
+  color: unset !important;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  // 点击效果
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(32, 55, 49, 0.15);
+  }
+
+  // 悬停效果
+  &:hover {
+    box-shadow: 0 4px 12px rgba(32, 55, 49, 0.15);
+  }
+
+  // 点击波纹效果
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+  }
+
+  &:active::before {
+    width: 200px;
+    height: 200px;
+  }
+
+  // 动态颜色样式 - 使用CSS变量
+  &.past,
+  &.planned {
+    // 使用CSS变量来设置动态颜色
+    background: var(--dynamic-bg, unset) !important;
+    color: var(--dynamic-color, unset) !important;
+    border-color: var(--dynamic-border, unset) !important;
+    
+    .story-date, .story-name, .address-text, .description-text {
+      color: inherit !important;
+    }
+    
+    .story-date .datetime .date-text,
+    .story-date .datetime .time-text {
+      color: inherit !important;
+    }
+
+    &:hover {
+      // 悬停时稍微变暗
+      filter: brightness(0.95);
+    }
+  }
+
+  &.unplanned {
+    background: $packers-navyblud !important;
+    color: $packers-white !important;
+    border: 2px solid $packers-navyblud !important;
+    margin-top: 0px;
+    
+    .story-date, .story-name, .address-text, .description-text {
+      color: $packers-white !important;
+    }
+
+    &:hover {
+      background: darken($packers-navyblud, 2%) !important;
+    }
+  }
+
+  &.same-day {
+    box-shadow: 0 -6px 12px -6px #333 !important;
+    // z-index now set dynamically based on position
+  }
+
+  &.today {
+    outline: 3px solid $packers-navyblud !important;
+    outline-offset: -3px;
+    box-shadow: 0 4px 12px rgba($packers-navyblud, 0.3) !important;
+    z-index: 2;
+    
+    &:hover {
+      box-shadow: 0 6px 16px rgba($packers-navyblud, 0.4) !important;
+    }
+  }
+
+  // 当同时有same-day和today样式时，确保正确的层次
+  &.same-day.today {
+    outline: 3px solid $packers-navyblud !important;
+    outline-offset: -3px;
+    box-shadow: 0 -6px 12px -6px #333, 0 4px 12px rgba($packers-navyblud, 0.3) !important;
+    z-index: 3;
+    
+    &:hover {
+      box-shadow: 0 -6px 12px -6px #333, 0 6px 16px rgba($packers-navyblud, 0.4) !important;
+    }
+  }
+
+  // z-index now set dynamically based on position in same-day group
+
+  .story-date {
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .datetime {
+      .date-text {
+        font-size: 24px;
+        color: inherit;
+        font-weight: 600;
+      }
+      .time-text {
+        font-size: 24px;
+        color: inherit;
+        font-weight: 600;
+      }
+    }
+    .address-text {
+      font-size: 20px;
+      color: inherit;
+      text-align: right;
+    }
+  }
+  .story-content {
+    .story-header {
+      display: flex;
+      align-items: baseline;
+      margin-bottom: 8px;
+      
+      .story-name {
+        font-size: 30px;
+        font-weight: 600;
+        color: inherit;
+      }
+      .description-text {
+        font-size: 18px;
+        color: inherit;
+        margin-left: 12px;
+      }
+    }
+    .story-description {
+      margin-bottom: 8px;
+      .description-text {
+        font-size: 20px;
+        color: inherit;
+        line-height: 1.4;
+      }
+    }
+    
+    .todo-list {
+      .todo-item {
+        font-size: 18px;
+        color: $packers-text-light;
+        display: block;
+        margin-bottom: 2px;
+        line-height: 1.3;
+      }
+    }
+  }
+}
+
+// 重排序控制按钮
+.reorder-controls {
+  position: absolute;
+  right: 12px; // 增加右边距
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center; // 确保垂直居中
+  align-items: center; // 确保水平居中
+  gap: 0px; // 增加按钮间距
+  z-index: 1012; // 提高z-index，确保在蒙版之上
+}
+
+.reorder-btn {
+  width: 48px; // 稍微减小按钮大小
+  height: 48px;
+  border: none !important;
+  border-radius: 0;
+  background: none !important; // 彻底去掉背景
+  color: $packers-gold;
+  font-size: 0; // 隐藏文字，只显示SVG
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: none !important; // 彻底去掉阴影
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  outline: none; // 去掉焦点轮廓
+  padding: 0; // 去掉内边距
+  overflow: visible; // 确保图标不被裁剪
+  z-index: 1013; // 提高z-index，确保在蒙版之上
+  position: relative;
+
+  // 简单的旋转字符
+  span {
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1;
+    display: block;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .arrow-up {
+    transform: rotate(-90deg);
+  }
+
+  .arrow-down {
+    transform: rotate(-90deg);
+  }
+
+  &:hover {
+    background: none !important;
+    transform: scale(1.2);
+    color: white;
+  }
+
+  &:active {
+    transform: scale(0.9);
+  }
+
+  &:focus {
+    outline: none; // 去掉焦点轮廓
+  }
+
+  // 重排序模式高亮
+  &.reordering {
+    background: rgba(255, 193, 7, 0.2) !important; // 浅金色背景
+    border: 2px solid $packers-gold !important; // 金色边框
+    box-shadow: 0 4px 16px rgba(255, 193, 7, 0.3) !important; // 金色阴影
+
+    // 确保在重排序模式下点击效果仍然正常
+    &:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4) !important;
+    }
+  }
+} 
+
+
+/* Time input group styles */
+.lf-time-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.lf-time-input {
+  flex: 1;
+}

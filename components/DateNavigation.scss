@@ -1,0 +1,135 @@
+@import '../styles/variables.scss';
+
+.date-navigation {
+  position: fixed;
+  right: 10px;
+  top: 0;
+  bottom: 0;
+  width: 36px; // 减小宽度
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff; // 添加白色背景确保空隙显示白色
+  padding: 0px;
+  
+  // SVG折线图容器
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin-left: 4px;
+    
+    .mirror-chart {
+      width: 100%;
+      height: 100%;
+      
+      .chart-fill {
+        // fill 由 SVG 内联样式控制，不在此处设置
+        opacity: 0.8;
+        transition: all 0.2s ease;
+      }
+      
+      .left-line, .right-line {
+        stroke: $packers-dark-green;
+        stroke-width: 0.5;
+        fill: none;
+        transition: all 0.2s ease;
+      }
+      
+      &:hover {
+        .chart-fill {
+          // fill 保持渐变，只调整透明度
+          opacity: 1;
+        }
+        
+        .left-line, .right-line {
+          stroke: $packers-gold;
+          stroke-width: 1;
+        }
+      }
+    }
+  }
+  
+  // Minimap styles
+  .minimap-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    background: #ffffff; // 确保容器背景为白色
+  }
+
+  .minimap-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #ffffff; // 空隙保持白色
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .minimap-block {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-radius: 0px;
+    transition: all 0.2s ease;
+    min-height: 2px;
+    font-family: inherit;
+    line-height: 1;
+    padding: 1px 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    // 动态颜色样式 - 使用CSS变量
+    &.status-past,
+    &.status-planned {
+      // 使用CSS变量来设置动态颜色
+      background-color: var(--dynamic-bg, unset) !important;
+      color: var(--dynamic-color, unset) !important;
+      border-color: var(--dynamic-border, unset) !important;
+    }
+    
+    &.status-unplanned {
+      background-color: $packers-navyblud !important; // 现代化的优雅红色
+      color: #ffffff !important; // 白色文字确保对比度
+    }
+    
+    // 动态字体大小
+    &.font-tiny {
+      font-size: 4px;
+    }
+    
+    &.font-small {
+      font-size: 6px;
+    }
+    
+    &.font-normal {
+      font-size: 8px;
+    }
+    
+    &.font-large {
+      font-size: 10px;
+    }
+    
+    &.font-hidden {
+      font-size: 0px;
+    }
+  }
+
+  .minimap-viewport {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background: rgba($packers-navyblud, 0.2); // 更深的黑色背景
+    border: 1.5px solid rgba($packers-navyblud, 1); // 深灰色边框
+    border-radius: 3px;
+    pointer-events: none;
+    transition: all 0.1s ease;
+  }
+}

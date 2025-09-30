@@ -1,0 +1,14 @@
+@import '../../styles/variables.scss';
+
+.index {
+  height: 100vh;
+  background: $packers-gray;
+  
+  &.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: $packers-text-light;
+  }
+}

@@ -1,0 +1,33 @@
+.day-dot-separator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2px 0 2px 0;
+  height: 8px; // 让线模式也能居中
+  color: rgba(#333, 1); // 设置统一色彩，点与线共用
+  
+  .dot {
+    width: 4px;
+    height: 4px;
+    background: currentColor;
+    border-radius: 50%;
+    margin: 0 1.5px;
+    aspect-ratio: 1 / 1;
+    flex: 0 0 auto;
+  }
+
+  &.line {
+    position: relative;
+  }
+  &.line::before {
+    content: '';
+    position: absolute;
+    left: 12px; // 与两侧卡片内圆角留点边距
+    right: 12px;
+    top: 50%;
+    height: 1px;
+    background: currentColor;
+    transform: translateY(-50%);
+    border-radius: 1px;
+  }
+} 

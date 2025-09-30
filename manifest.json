@@ -1,0 +1,12 @@
+{
+    "id": "lac-lifeflow",
+    "name": "LaC.LifeFlow",
+    "version": "1.0.0",
+    "minAppVersion": "1.6.0",
+    "description": "Life as Code - LifeFlow 事项时间线插件",
+    "author": "alvinfunborn",
+    "authorUrl": "https://github.com/alvinfunborn",
+    "fundingUrl": "",
+    "isDesktopOnly": false,
+    "tags": ["timeline", "life-tracking", "productivity", "organization"]
+}
