@@ -88,6 +88,7 @@ export const loadAMapAPI = (apiKey?: string): Promise<any> => {
     const securityKey = getSecurityKey(apiKey || '');
     script.src = `https://webapi.amap.com/maps?v=2.0&key=${securityKey}`;
     script.async = true;
+    script.crossOrigin = 'anonymous';
     
     script.onload = () => {
       if (window.AMap) {

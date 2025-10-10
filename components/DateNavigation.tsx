@@ -203,7 +203,8 @@ export default function DateNavigation({
     if (!rect) return;
     const offset = clientY - rect.top;
     const ratio = rect.height === 0 ? 0 : offset / rect.height;
-    const target = ratio * safeTotalHeight - viewportHeight / 2;
+    // 直接滚动到点击位置，不跳转视口
+    const target = ratio * safeTotalHeight;
     const clamped = Math.max(0, Math.min(target, safeTotalHeight - viewportHeight));
     onViewportJump?.(clamped);
   };

@@ -53,12 +53,33 @@ export default function Index({ repository, settings }: IndexProps) {
       if (options?.needsResort) {
         await loadStories();
       } else {
-        // 保存单个修改的故事到文件
-        const changedStory = updatedStories.find((story, index) => 
-          story !== stories[index]
-        );
+        // 检查是否有新增或修改的故事
+        const changedStories: StoryWithDistance[] = [];
         
-        if (changedStory) {
+        // 检查长度变化（新增或删除）
+        if (updatedStories.length !== stories.length) {
+          console.log('🔍 [handleStoriesChange] Length changed:', stories.length, '->', updatedStories.length);
+          // 找出所有新增的故事
+          updatedStories.forEach((story, index) => {
+            if (!stories[index] || story !== stories[index]) {
+              changedStories.push(story);
+            }
+          });
+        } else {
+          // 长度相同，找出修改的故事
+          updatedStories.forEach((story, index) => {
+            if (story !== stories[index]) {
+              changedStories.push(story);
+            }
+          });
+        }
+        
+        console.log('🔍 [handleStoriesChange] Changed stories count:', changedStories.length);
+        
+        // 保存所有变化的故事，并收集保存后的 ID
+        const savedStoryIds = new Map<StoryWithDistance, string>();
+        
+        for (const changedStory of changedStories) {
           console.log('🔍 [handleStoriesChange] Saving story:', {
             id: changedStory.id,
             name: changedStory.name,
@@ -78,7 +99,26 @@ export default function Index({ repository, settings }: IndexProps) {
           
           console.log('🔍 [handleStoriesChange] Plain story to save:', plainStory);
           await repository.saveStory(plainStory);
+          
+          // 保存后，plainStory.id 会被更新为实际的文件名
+          console.log('🔍 [handleStoriesChange] Story saved with ID:', plainStory.id);
+          savedStoryIds.set(changedStory, plainStory.id!);
         }
+        
+        // 更新根文件，确保引用顺序与故事列表一致
+        // 使用保存后的 ID
+        const plainStories = updatedStories.map(story => {
+          const savedId = savedStoryIds.get(story);
+          return {
+            id: savedId || story.id,
+            name: story.name,
+            start_time: story.start_time,
+            end_time: story.end_time,
+            description: story.description,
+            address: story.address
+          };
+        });
+        await repository.updateRootFile(plainStories);
       }
     } catch (e) {
       console.error('❌ [handleStoriesChange] 处理失败:', e);

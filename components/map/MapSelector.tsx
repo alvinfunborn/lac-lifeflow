@@ -83,11 +83,26 @@ export default function MapSelector({
             center: mapCenter,
             mapStyle: amapConfig.mapStyle,
             // 确保地图填满容器
-            resizeEnable: true
+            resizeEnable: true,
+            // 添加 Canvas 优化配置
+            renderer: 'canvas',
+            // 禁用一些可能导致加载问题的功能
+            features: ['bg', 'road', 'building', 'point']
           });
 
           mapInstanceRef.current = map;
-          
+
+          // 加载比例尺插件并添加控件
+          AMap.plugin('AMap.Scale', function() {
+            // 创建比例尺控件实例
+            const scale = new AMap.Scale({
+              offset: new AMap.Pixel(16, 80) // 设置偏移量，距离左边16px，距离上边80px TODO offset not working
+            });
+            
+            // 添加比例尺控件到地图上
+            map.addControl(scale);
+          });
+
           // 处理初始位置
           if (initialLocation && initialLocation.longitude && initialLocation.latitude) {
             const coordSystem = initialLocation.coordinate_system || 'WGS84';
@@ -600,6 +615,7 @@ export default function MapSelector({
             </div>
           )}
         </div>
+
 
         {/* 底部操作按钮 */}
         <div className="lf-map-bottom-controls">

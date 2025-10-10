@@ -258,8 +258,15 @@ export default function StoryList({ stories, onStoriesChange, settings }: StoryL
       hasDate: false
     };
 
-    // 3) 新故事总是插入到当前故事的下一个位置
-    const insertIndex = currentIndex >= 0 ? currentIndex + 1 : savedStories.length;
+    // 3) 找到当前故事后面的第一个已有故事，将新故事插入到其上方
+    let insertIndex = savedStories.length; // 默认插入到最后
+    for (let i = currentIndex + 1; i < savedStories.length; i++) {
+      // 找到第一个已有故事（不是草稿）
+      if (savedStories[i]?.name && savedStories[i]?.name?.trim() !== '') {
+        insertIndex = i;
+        break;
+      }
+    }
 
     setEditingStory(draftStory);
     setIsCreatingDraft(true);
@@ -388,7 +395,10 @@ export default function StoryList({ stories, onStoriesChange, settings }: StoryL
   const handleScroll = React.useCallback(() => {
     if (!scrollViewRef.current) return;
     const scrollEl = scrollViewRef.current;
-    setScrollTop(scrollEl.scrollTop);
+    // 使用 requestAnimationFrame 避免频繁状态更新
+    requestAnimationFrame(() => {
+      setScrollTop(scrollEl.scrollTop);
+    });
   }, []);
 
   // 搜索处理函数
@@ -778,7 +788,12 @@ export default function StoryList({ stories, onStoriesChange, settings }: StoryL
         scrollTop={scrollTop}
         onViewportJump={(nextScrollTop) => {
           if (!scrollViewRef.current) return;
-          scrollViewRef.current.scrollTop = nextScrollTop;
+          // 直接滚动到目标位置，使用平滑滚动
+          scrollViewRef.current.scrollTo({
+            top: nextScrollTop,
+            behavior: 'smooth'
+          });
+          // 更新状态
           setScrollTop(nextScrollTop);
         }}
       />

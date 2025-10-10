@@ -100,14 +100,6 @@ export class LifeFlowRepository {
                     // 文件名就是ID
                     const storyId = extractIdFromFilename(file.basename);
                     
-                    console.log('🔍 [loadAll] Loading story:', {
-                        filePath: file.path,
-                        basename: file.basename,
-                        storyId: storyId,
-                        dataName: data.name,
-                        hasDetail: !!data.detail
-                    });
-                    
                     const story: Story = {
                         id: storyId,
                         name: data.name || target,
@@ -197,17 +189,20 @@ export class LifeFlowRepository {
         }
 
         // 4. 更新根文件中对该故事的双链引用
-        await this.updateRootFile(story, true);
+        // 注意：这里需要传入完整的故事列表，但当前函数只接收单个故事
+        // 暂时保持原有逻辑，调用方需要负责调用 updateRootFile 传入完整列表
     }
 
     // 删除故事
     async deleteStory(story: Story): Promise<void> {
-        // 更新根文件
-        await this.updateRootFile(story, false);
+        // 注意：这里需要传入完整的故事列表，但当前函数只接收单个故事
+        // 调用方需要负责调用 updateRootFile 传入完整列表
     }
 
-    // 更新根文件
-    private async updateRootFile(story: Story, isAdd: boolean): Promise<void> {
+    // 更新根文件 - 根据故事列表顺序重写整个文件
+    async updateRootFile(stories: Story[]): Promise<void> {
+        console.log('🔍 [updateRootFile] Called with stories:', stories.map(s => s.id));
+        
         const rootPath = this.rootFilePath;
         let rootContent = '';
 
@@ -218,28 +213,62 @@ export class LifeFlowRepository {
             }
         } catch (e) {
             // 文件不存在，创建新文件
+            rootContent = 'type = "root"\nrenders = ["lifeflow"]\n';
         }
 
-        const storyName = story.name || '';
-        const escapedName = this.escapeRegExp(storyName);
-        if (isAdd) {
-            // 添加故事引用：若已存在任意形式的双链（[[name]] 或 [[name|alias]]）则不重复添加
-            const hasAnyLink = new RegExp(`\\[\\[${escapedName}(?:\\|[^\\]]+)?\\]\\]`).test(rootContent);
-            if (!hasAnyLink && storyName) {
-                rootContent += (rootContent.endsWith('\n') ? '' : '\n') + `[[${storyName}]]\n`;
-            }
-        } else {
-            // 删除故事引用：同时移除 [[name]] 与 [[name|alias]] 的整行或行内片段
-            const removePattern = new RegExp(`\\[\\[${escapedName}(?:\\|[^\\]]+)?\\]\\]`, 'g');
-            rootContent = rootContent.replace(removePattern, '');
-            rootContent = rootContent.replace(/\n{3,}/g, '\n\n').trimEnd();
+        // 1. 读取文件，将所有 [[xxx]] 转换为 [["xxx"]] 以便 TOML 解析
+        //    每个 [[xxx]] 都会被 TOML 解析为表数组
+        const tomlCompatibleContent = rootContent.replace(/\[\[([^\]]+)\]\]/g, '[[\"$1\"]]');
+        
+        // 2. 解析整个文件为 TOML
+        let parsed: any = {};
+        try {
+            parsed = this.parseToml(tomlCompatibleContent) || {};
+        } catch (e) {
+            console.warn('Failed to parse TOML, using default:', e);
+            parsed = { type: 'root', renders: ['lifeflow'] };
         }
+
+        // 3. 更新故事引用的表数组
+        //    清除所有现有的故事表数组，只保留非故事相关的表数组
+        const storyIds = new Set(stories.map(s => s.id).filter(Boolean));
+        const allFiles = this.app.vault.getMarkdownFiles();
+        const allStoryIds = new Set(allFiles.map(f => f.basename));
+        
+        // 删除所有故事相关的表数组
+        for (const key of Object.keys(parsed)) {
+            if (allStoryIds.has(key)) {
+                delete parsed[key];
+            }
+        }
+        
+        // 添加新的故事表数组（按顺序）
+        // 注意：需要添加至少一个对象，否则会被序列化为空数组而不是表数组
+        for (const story of stories) {
+            if (story.id) {
+                parsed[story.id] = [{}]; // 添加一个空对象，确保序列化为表数组
+            }
+        }
+
+        // 4. 转换回 TOML 字符串（保留所有字段）
+        const tomlString = TOMLStringify.toToml(parsed);
+        
+        // 5. 将所有 [["xxx"]] 转换回 [[xxx]]，并移除空对象
+        let finalContent = tomlString.replace(/\[\["([^"]+)"\]\]/g, '[[$1]]');
+        
+        // 6. 清理空对象（表数组中的空内容）
+        //    将 [[xxx]]\n\n 或 [[xxx]]\n[xxx.xxx]\n 等模式简化为 [[xxx]]\n
+        finalContent = finalContent.replace(/(\[\[[^\]]+\]\])\s*\n\s*\n/g, '$1\n');
+
+        console.log('🔍 [updateRootFile] Final content:', finalContent);
 
         const existingRoot = this.app.vault.getAbstractFileByPath(rootPath);
         if (existingRoot && existingRoot instanceof TFile) {
-            await this.app.vault.modify(existingRoot, rootContent);
+            await this.app.vault.modify(existingRoot, finalContent);
+            console.log('✅ [updateRootFile] Root file updated');
         } else {
-            await this.app.vault.create(rootPath, rootContent);
+            await this.app.vault.create(rootPath, finalContent);
+            console.log('✅ [updateRootFile] Root file created');
         }
     }
 
