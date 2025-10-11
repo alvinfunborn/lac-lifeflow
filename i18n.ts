@@ -44,7 +44,7 @@ const dict: Dict = {
 
 	// Menu / Command
 	'menu.openWith': { zh: '用 LaC.LifeFlow 打开', en: 'Open with LaC.LifeFlow' },
-	'command.open': { zh: 'Open', en: 'Open' },
+	'command.open': { zh: '打开', en: 'Open' },
 	'notice.entryFileNotExist': { zh: '入口文件不存在', en: 'Entry file does not exist' },
 	'notice.invalidTomlFormat': { zh: '文件必须是有效的LifeFlow TOML格式，包含[detail]和[[detail.stories]]结构', en: 'File must be valid LifeFlow TOML format with [detail] and [[detail.stories]] structure' },
 	'notice.openFailed': { zh: '打开失败', en: 'Open failed' },

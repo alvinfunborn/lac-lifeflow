@@ -13,6 +13,8 @@ Life as Code - LifeFlow is a timeline plugin to manage and display your life eve
 - **Search Function**: Quickly search and filter events
 - **Location Recording**: Record the location where events occurred
 
+![image](docs/demo.jpg)
+
 ### 📊 Data Format
 Uses TOML format to store event data, perfectly integrated with Obsidian's Markdown files:
 

@@ -13,6 +13,8 @@ Life as Code - LifeFlow 事项时间线插件，将你的生活事件以时间�
 - **搜索功能**: 快速搜索和筛选事件
 - **地址记录**: 记录事件发生的地点信息
 
+![image](docs/demo.jpg)
+
 ### 📊 数据格式
 使用TOML格式存储事件数据，与Obsidian的Markdown文件完美集成：
 

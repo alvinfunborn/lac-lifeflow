@@ -417,6 +417,13 @@ export default function MapSelector({
           <div 
             ref={mapContainerRef} 
             className="lf-map-canvas"
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onMouseMove={(e) => e.stopPropagation()}
+            onMouseUp={(e) => e.stopPropagation()}
+            onWheel={(e) => e.stopPropagation()}
           />
           {!mapLoaded && (
             <div className="lf-map-loading">
