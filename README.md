@@ -1,20 +1,22 @@
-# LaC.LifeFlow 插件
+# LaC.LifeFlow Plugin
 
-Life as Code - LifeFlow 事项时间线插件，将你的生活事件以时间线的方式进行管理和展示。
+English | [简体中文](README.zh-CN.md)
 
-## 功能特性
+Life as Code - LifeFlow is a timeline plugin to manage and display your life events in a timeline view.
 
-### 🎯 核心功能
-- **时间线展示**: 按时间顺序展示生活事件和事项
-- **事件管理**: 添加、编辑、删除生活事件
-- **时间排序**: 自动按日期和时间排序事件
-- **搜索功能**: 快速搜索和筛选事件
-- **地址记录**: 记录事件发生的地点信息
+## Features
 
-### 📊 数据格式
-使用TOML格式存储事件数据，与Obsidian的Markdown文件完美集成：
+### 🎯 Core Features
+- **Timeline View**: Display life events and activities in chronological order
+- **Event Management**: Add, edit, and delete life events
+- **Time Sorting**: Automatically sort events by date and time
+- **Search Function**: Quickly search and filter events
+- **Location Recording**: Record the location where events occurred
 
-**根文件 (lifeflow.md):**
+### 📊 Data Format
+Uses TOML format to store event data, perfectly integrated with Obsidian's Markdown files:
+
+**Root File (lifeflow.md):**
 ```toml
 type = "root"
 renders = ["lifeflow"]
@@ -24,7 +26,7 @@ renders = ["lifeflow"]
 [[Watching Netflix]]
 ```
 
-**事件文件 (TestEvent1.md):**
+**Event File (TestEvent1.md):**
 ```toml
 name = "Practice Coding"
 
@@ -35,7 +37,7 @@ address = { name = "Beach" }
 description = "Explored new places"
 ```
 
-**带地址信息的事件文件:**
+**Event File with Location Information:**
 ```toml
 name = "Watching Netflix"
 
@@ -45,91 +47,121 @@ end_time = "2025-10-01 18:59"
 description = "Made delicious food12"
 
 [detail.address]
-name = "小米之家(天洋广场店)"
-address = "燕郊镇天洋广场c馆一层小米之家"
+name = "Xiaomi Store (Tianyang Plaza)"
+address = "Xiaomi Store, 1st Floor, Building C, Tianyang Plaza, Yanjiao"
 longitude = 116.821768
 latitude = 39.964811
 coordinate_system = "GCJ-02"
 ```
 
-### 🔧 插件命令
+### 🔧 Plugin Commands
 
-1. **打开 LaC.LifeFlow** - 打开时间线视图
-2. **文件右键菜单** - 用 LifeFlow 打开 Markdown 文件
+1. **Open LaC.LifeFlow** - Open the timeline view
+2. **File Context Menu** - Open Markdown files with LifeFlow
 
-### 📁 文件结构
+### 📁 File Structure
 
-插件会在指定的文件夹中创建以下文件：
-- `lifeflow.md` - 根文件，包含事件引用列表
-- `TestEvent1.md` - 事件文件，包含具体的事件数据
-- `TestEvent2.md` - 事件文件，包含具体的事件数据
-- `Watching Netflix.md` - 事件文件，包含具体的事件数据
-- ... 更多事件文件
+The plugin creates the following files in the specified folder:
+- `lifeflow.md` - Root file containing the event reference list
+- `TestEvent1.md` - Event file with specific event data
+- `TestEvent2.md` - Event file with specific event data
+- `Watching Netflix.md` - Event file with specific event data
+- ... More event files
 
-### ⚙️ 设置选项
+### ⚙️ Settings
 
-- **入口文件**: 指定存储事件数据的文件路径（默认：LaC/LifeFlow/lifeflow.md）
-- **启用右键菜单**: 是否在文件右键菜单中显示"用 LaC.LifeFlow 打开"选项
-- **语言设置**: 界面语言（自动/中文/英文）
-- **地图API提供商**: 选择地图服务提供商（无/高德）
-- **高德Web服务Key**: 高德地图API密钥，用于地址搜索和坐标转换
+- **Entry File**: Specify the file path for storing event data (default: LaC/LifeFlow/lifeflow.md)
+- **Enable Context Menu**: Show "Open with LaC.LifeFlow" option in file context menu
+- **Language Settings**: Interface language (auto/Chinese/English)
+- **Map API Provider**: Choose map service provider (None/Amap/Google Maps)
+  - **None**: Disable map features, use simple text address input
+  - **Amap**: Use Amap (高德地图) service for China regions
+  - **Google Maps**: Use Google Maps service for international regions
+- **Amap Web Service Key**: Amap API key for address search, geocoding, and coordinate conversion
+  - Get your free API key from [Amap Open Platform](https://lbs.amap.com/)
+  - Required features: Web Service API (address search, geocoding)
+- **Google Maps API Key**: Google Maps API key for address search, geocoding, and coordinate conversion
+  - Get your free API key from [Google Open Platform](https://console.cloud.google.com/)
+  - Required features: Maps JavaScript API, Places API, and Geocoding API
 
-## 使用方法
+## Installation
 
-### 1. 安装插件
-将插件文件夹复制到 `.obsidian/plugins/` 目录下，然后在Obsidian中启用插件。
+### Method 1: From Obsidian Community Plugins (Recommended)
+1. Open Obsidian Settings
+2. Navigate to Community Plugins and disable Safe Mode
+3. Click Browse and search for "LaC.LifeFlow"
+4. Click Install, then Enable
 
-### 2. 打开时间线
-使用命令面板（Ctrl+P）搜索"打开 LaC.LifeFlow"，插件会自动创建示例数据文件。
+### Method 2: Using BRAT (Beta Reviewers Auto-update Tester)
+1. Install BRAT plugin from Community Plugins
+2. Open BRAT settings
+3. Click "Add Beta plugin" and enter: `alvinfunborn/lac-lifeflow`
+4. Enable the plugin in Community Plugins
 
-### 3. 管理事件
-在时间线界面中：
-- **添加事件**: 点击"+"按钮添加新事件
-- **编辑事件**: 点击事件卡片进行编辑
-- **删除事件**: 在编辑界面中删除事件
-- **搜索事件**: 使用搜索框快速查找事件
-- **地址选择**: 点击地址字段打开地图选择器，选择事件发生地点
+### Method 3: Manual Installation
+1. Download the latest release from GitHub
+2. Extract the files to `.obsidian/plugins/lac-lifeflow/` directory
+3. Enable the plugin in Obsidian Settings
 
-### 4. 时间排序规则
-- 严格按事件发生日期升序排列
-- 同一天内的事件按时间先后排序
-- 无明确时间的事件保持文档中的原始顺序
+## Usage
 
-### 5. 文件组织方式
-- **根文件**: `lifeflow.md` 包含所有事件的引用列表
-- **事件文件**: 每个事件都有独立的 `.md` 文件，包含完整的事件数据
-- **地址信息**: 支持简单地址和详细坐标信息
-- **时间格式**: 使用 `start_time` 和 `end_time` 字段，格式为 "YYYY-MM-DD HH:mm"
+### 1. Open Timeline
+Use the command palette (Ctrl+P) and search for "Open LaC.LifeFlow". The plugin will automatically create sample data files.
 
-## 技术实现
+### 2. Manage Events
+In the timeline interface:
+- **Add Event**: Click the "+" button to add a new event
+- **Edit Event**: Click on an event card to edit it
+- **Delete Event**: Delete events in the editing interface
+- **Search Events**: Use the search box to quickly find events
+- **Select Location**: Click on the address field to open the map selector and choose event location
 
-- 使用Obsidian Plugin API进行文件操作
-- 支持TOML格式的数据存储
-- React + TypeScript 构建响应式UI
-- 支持移动端和桌面端
-- 完全本地存储，保护用户隐私
-- 集成高德地图API，支持地址搜索和坐标转换
-- 支持多语言界面（中文/英文）
-- 分布式文件存储：每个事件独立文件，便于管理和版本控制
-- 支持多种坐标系统：WGS84、GCJ-02、BD-09
+### 3. Using Map Features
+When a map provider is configured:
+- **Interactive Map Selector**: Click the address field to open a full-screen map interface
+- **Search Addresses**: Type to search for locations by name or address
+- **Click to Select**: Click anywhere on the map to select a location
+- **Auto-save Coordinates**: Longitude, latitude, and coordinate system are automatically saved
+- **Coordinate Systems Support**: WGS84, GCJ-02 (China), BD-09 (Baidu)
+- **Offline Access**: Once saved, location data is stored locally and works offline
 
-## 开发说明
+### 4. Time Sorting Rules
+- Events are strictly sorted by occurrence date in ascending order
+- Events on the same day are sorted by time
+- Events without specific times maintain their original order in the document
 
-插件基于Obsidian Plugin API开发，主要组件：
+### 5. File Organization
+- **Root File**: `lifeflow.md` contains the reference list of all events
+- **Event Files**: Each event has its own `.md` file containing complete event data
+- **Location Information**: Supports simple addresses and detailed coordinate information
+- **Time Format**: Uses `start_time` and `end_time` fields in "YYYY-MM-DD HH:mm" format
 
-- `LifeFlowPlugin`: 主插件类
-- `LifeFlowView`: 时间线视图组件
-- `StoryList`: 事件列表组件
-- `StoryEditModal`: 事件编辑模态框
-- `SearchComponent`: 搜索组件
-- `MapSelector`: 地图选择器组件
-- `AddressInput`: 地址输入组件
-- `LifeFlowRepository`: 数据仓库类
+## Technical Implementation
 
-## 许可证
+- Uses Obsidian Plugin API for file operations
+- Supports TOML format for data storage
+- React + TypeScript for building responsive UI
+- Supports both mobile and desktop platforms
+- Fully local storage to protect user privacy
+- Integrates Amap API for address search and coordinate conversion
+- Supports multilingual interface (Chinese/English)
+- Distributed file storage: each event in a separate file for easier management and version control
+- Supports multiple coordinate systems: WGS84, GCJ-02, BD-09
+
+## Development
+
+The plugin is developed based on Obsidian Plugin API. Main components:
+
+- `LifeFlowPlugin`: Main plugin class
+- `LifeFlowView`: Timeline view component
+- `StoryList`: Event list component
+- `StoryEditModal`: Event editing modal
+- `SearchComponent`: Search component
+- `MapSelector`: Map selector component
+- `AddressInput`: Address input component
+- `LifeFlowRepository`: Data repository class
+
+## License
 
 MIT License
 
-## TODO
-1. 地图比例尺
-1. 点击minimap滚动

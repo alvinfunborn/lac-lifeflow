@@ -24,6 +24,7 @@
   padding-top: 8px;
   background: #f8f9fb;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 .story-list-container .story-list::after {
   content: "";
@@ -76,7 +77,7 @@
 }
 
 .reorder-mask-background {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -84,7 +85,18 @@
   background: rgba(0, 0, 0, 0.3);
   cursor: pointer;
   pointer-events: auto;
-  z-index: 1001;
+  z-index: 1002;
+}
+
+.reorder-button-area {
+  position: fixed;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 64px;
+  height: 120px;
+  z-index: 1014;
+  pointer-events: none;
 }
 
 .story-card.reordering {

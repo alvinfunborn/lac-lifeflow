@@ -13,6 +13,7 @@
     padding-top: 8px; // 顶部留白随内容滚动
     background: #f8f9fb; // 略深的白色，避免纯白
     overflow-x: hidden; // 防止左右滚动
+    overflow-y: auto; // 允许垂直滚动
     
     // 额外的底部占位，确保最后一项不被固定栏覆盖
     &::after {
@@ -81,7 +82,7 @@
 
 // 重排序蒙版背景（专门处理点击退出）
 .reorder-mask-background {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -89,7 +90,19 @@
   background: rgba(0, 0, 0, 0.3); // 半透明背景
   cursor: pointer;
   pointer-events: auto; // 专门处理点击退出
-  z-index: 1001; // 提高z-index，确保能处理点击
+  z-index: 1002; // 提高z-index，确保能处理点击
+}
+
+// 重排序按钮区域 - 阻止蒙版点击事件
+.reorder-button-area {
+  position: fixed;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 64px;
+  height: 120px;
+  z-index: 1014;
+  pointer-events: none;
 }
 
 // 重排序模式下的卡片样式

@@ -1,2 +1,21 @@
+# Dependencies
 **/node_modules
+
+# Development data
 data.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Temporary files
+*.tmp
+.cache/

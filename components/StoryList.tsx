@@ -741,32 +741,9 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
           <div
             className="reorder-mask-background"
             onClick={handleEndReorder}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 1002,
-              background: 'rgba(0, 0, 0, 0.3)',
-              cursor: 'pointer',
-              pointerEvents: 'auto'
-            }}
           />
           {/* 重排序按钮区域 - 阻止蒙版点击事件 */}
-          <div
-            className="reorder-button-area"
-            style={{
-              position: 'fixed',
-              right: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: '64px',
-              height: '120px',
-              zIndex: 1014,
-              pointerEvents: 'none'
-            }}
-          />
+          <div className="reorder-button-area" />
         </>
       )}
       
@@ -774,7 +751,6 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
         className='story-list'
         onScroll={handleScroll}
         ref={scrollViewRef}
-        style={{ overflowY: 'auto' }}
       >
         {renderStories()}
       </div>
