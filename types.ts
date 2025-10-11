@@ -3,8 +3,9 @@ export interface LifeFlowSettings {
     entryFile: string; // 例如 lifeflow/lifeflow.md
     enableContextMenu: boolean; // 文件右键"用 LaC.LifeFlow 打开"
     locale?: 'auto' | 'zh' | 'en';
-    mapApiProvider: 'none' | 'gaode'; // 地图API提供商
+    mapApiProvider: 'none' | 'gaode' | 'google'; // 地图API提供商
     gaodeWebServiceKey?: string; // 高德Web服务Key
+    googleMapsApiKey?: string; // Google Maps API Key
 }
 
 export const DEFAULT_SETTINGS: LifeFlowSettings = {
@@ -12,5 +13,6 @@ export const DEFAULT_SETTINGS: LifeFlowSettings = {
     enableContextMenu: true,
     locale: 'auto',
     mapApiProvider: 'none',
-    gaodeWebServiceKey: ''
+    gaodeWebServiceKey: '',
+    googleMapsApiKey: ''
 }

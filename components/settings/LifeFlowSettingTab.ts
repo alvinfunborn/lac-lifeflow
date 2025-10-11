@@ -91,11 +91,12 @@ coordinate_system = "GCJ-02"`;
             .addDropdown((dropdown: any) => dropdown
                 .addOption('none', t('settings.map.provider.option.none'))
                 .addOption('gaode', t('settings.map.provider.option.gaode'))
+                .addOption('google', t('settings.map.provider.option.google'))
                 .setValue(this.plugin.settings.mapApiProvider || 'none')
                 .onChange(async (value: string) => {
-                    this.plugin.settings.mapApiProvider = value as 'none' | 'gaode';
+                    this.plugin.settings.mapApiProvider = value as 'none' | 'gaode' | 'google';
                     await this.plugin.saveSettings();
-                    // 重新渲染设置界面以显示/隐藏高德Key设置
+                    // 重新渲染设置界面以显示/隐藏API Key设置
                     this.display();
                 }));
 
@@ -109,6 +110,20 @@ coordinate_system = "GCJ-02"`;
                     .setValue(this.plugin.settings.gaodeWebServiceKey || '')
                     .onChange(async (value: string) => {
                         this.plugin.settings.gaodeWebServiceKey = value?.trim() || '';
+                        await this.plugin.saveSettings();
+                    }));
+        }
+
+        // 只有选择Google时才显示Google Maps API Key设置
+        if (this.plugin.settings.mapApiProvider === 'google') {
+            new Setting(containerEl)
+                .setName(t('settings.map.googleKey.name'))
+                .setDesc(t('settings.map.googleKey.desc'))
+                .addText((text: any) => text
+                    .setPlaceholder(t('settings.map.googleKey.placeholder'))
+                    .setValue(this.plugin.settings.googleMapsApiKey || '')
+                    .onChange(async (value: string) => {
+                        this.plugin.settings.googleMapsApiKey = value?.trim() || '';
                         await this.plugin.saveSettings();
                     }));
         }

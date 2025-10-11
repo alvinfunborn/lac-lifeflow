@@ -670,7 +670,7 @@
   display: flex;
   gap: 12px;
   background: rgba(255, 255, 255, 0.95);
-  padding: 12px;
+  padding: 10px;
   border-radius: 12px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
@@ -729,12 +729,27 @@
   justify-content: center !important;
   z-index: 1 !important;
   pointer-events: auto !important;
+  font-size: 0 !important; /* 隐藏文字内容 */
+  /* 搜索图标 SVG */
+}
+.lf-map-search-btn::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-image: url('data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .lf-map-search-btn:hover:not(:disabled) {
   background: #f0f0f0 !important;
   color: #333 !important;
   transform: translateY(-50%) translateY(-1px) !important;
+}
+.lf-map-search-btn:hover:not(:disabled)::before {
+  background-image: url('data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>');
 }
 
 .lf-map-search-btn:active:not(:disabled) {
@@ -746,6 +761,22 @@
   cursor: not-allowed !important;
   color: #ccc !important;
   transform: translateY(-50%) !important;
+}
+.lf-map-search-btn:disabled::before {
+  background-image: url('data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>');
+}
+
+/* 清除按钮的 X 图标 */
+.lf-map-clear-btn::before {
+  background-image: url('data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>') !important;
+}
+
+.lf-map-clear-btn:hover:not(:disabled)::before {
+  background-image: url('data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>') !important;
+}
+
+.lf-map-clear-btn:disabled::before {
+  background-image: url('data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>') !important;
 }
 
 /* 搜索错误提示样式 */
@@ -899,6 +930,34 @@
   min-height: 100% !important;
 }
 
+/* Google Maps 组件样式 */
+.lf-map-canvas .gm-style,
+.lf-map-canvas .gm-style > div:first-child {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  border-radius: 16px;
+}
+
+/* Google Maps 标记样式调整 */
+.lf-map-canvas .gm-style .gm-style-iw {
+  border-radius: 8px;
+}
+
+/* 隐藏 Google Maps 版权信息,但保留比例尺 */
+.lf-map-canvas .gm-style-cc {
+  display: none !important;
+}
+
+/* 确保比例尺可见 */
+.lf-map-canvas .gm-style .gm-style-cc,
+.lf-map-canvas .gm-style [role=region] {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* 保留 Google Maps 缩放控件等有用功能 */
 .lf-map-loading {
   position: absolute;
   top: 0;
@@ -1259,6 +1318,94 @@
     height: 250px;
   }
 }
+.lf-custom-map-type-control {
+  position: absolute;
+  bottom: 70px;
+  right: 10px;
+  z-index: 9999;
+  background: #e0e0e0;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  margin-top: 0px;
+  margin-left: 0px;
+  padding: 6px;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  color: #000;
+  text-align: center;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.lf-custom-map-type-control:hover {
+  background: #f5f5f5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.lf-map-type-control-offset {
+  margin-bottom: 60px;
+}
+
+.lf-provider-switcher-control {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: #e0e0e0;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  padding: 1px 2px;
+  cursor: pointer;
+  margin: 0px;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: bold;
+  min-width: 40px;
+  height: 18px;
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: all 0.2s ease;
+  line-height: 14px;
+  z-index: 9999 !important;
+  position: absolute !important;
+  top: 0px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+.lf-provider-select {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 9px;
+  font-weight: bold;
+  text-align: center;
+  color: #000;
+  cursor: pointer;
+  width: 100%;
+  height: 14px;
+  padding: 2px;
+  margin: 0;
+}
+.lf-provider-select:hover {
+  background: #f5f5f5;
+}
+.lf-provider-select:focus {
+  background: #f0f8ff;
+}
+
 /* LifeFlow modal unified styles */
 .lf-modal-mask {
   position: fixed;

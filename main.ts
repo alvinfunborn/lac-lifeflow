@@ -33,7 +33,11 @@ class LifeFlowView extends ItemView {
                 this.repository = new LifeFlowRepository(this.plugin.app, this.filePath);
             }
             
-            this.reactRoot.render(React.createElement(Index, { repository: this.repository, settings: this.plugin.settings }));
+            this.reactRoot.render(React.createElement(Index, { 
+                repository: this.repository, 
+                settings: this.plugin.settings,
+                updateSettings: (newSettings: Partial<LifeFlowSettings>) => this.plugin.updateSettings(newSettings)
+            }));
         }
     }
 
@@ -57,7 +61,11 @@ class LifeFlowView extends ItemView {
             if (this.filePath) {
                 this.repository = new LifeFlowRepository(this.plugin.app, this.filePath);
                 if (this.reactRoot) {
-                    this.reactRoot.render(React.createElement(Index, { repository: this.repository, settings: this.plugin.settings }));
+                    this.reactRoot.render(React.createElement(Index, { 
+                        repository: this.repository, 
+                        settings: this.plugin.settings,
+                        updateSettings: (newSettings: Partial<LifeFlowSettings>) => this.plugin.updateSettings(newSettings)
+                    }));
                 }
             }
         }
@@ -215,6 +223,11 @@ renders = ["lifeflow"]
     async saveSettings() {
         await this.saveData(this.settings);
         setLocale(this.settings.locale || 'auto');
+    }
+
+    async updateSettings(newSettings: Partial<LifeFlowSettings>) {
+        Object.assign(this.settings, newSettings);
+        await this.saveSettings();
     }
 
 

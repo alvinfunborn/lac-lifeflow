@@ -18,6 +18,7 @@ interface StoryEditModalProps {
   onNext: (story: StoryWithDistance) => void;
   onDelete: (story: StoryWithDistance) => void;
   settings: LifeFlowSettings;
+  updateSettings?: (newSettings: Partial<LifeFlowSettings>) => Promise<void>;
 }
 
 export default function StoryEditModal({ 
@@ -27,7 +28,8 @@ export default function StoryEditModal({
   onSave, 
   onNext,
   onDelete,
-  settings
+  settings,
+  updateSettings
 }: StoryEditModalProps) {
   const [formData, setFormData] = useState({} as Partial<StoryWithDistance>);
   const [nameError, setNameError] = useState('');
@@ -367,6 +369,7 @@ export default function StoryEditModal({
             title="选择地点"
             placeholder="搜索地点..."
             settings={settings}
+            updateSettings={updateSettings}
           />
         )}
         </div>

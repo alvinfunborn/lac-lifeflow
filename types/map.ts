@@ -22,6 +22,7 @@ export interface MapSelectorProps {
   title?: string;
   placeholder?: string;
   settings: any; // LifeFlowSettings - 使用any避免循环导入
+  updateSettings?: (newSettings: Partial<any>) => Promise<void>; // 设置更新函数
 }
 
 export interface MapConfig {

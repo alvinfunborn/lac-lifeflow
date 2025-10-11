@@ -78,9 +78,13 @@ const dict: Dict = {
 	'settings.map.provider.desc': { zh: '选择地图服务提供商，用于地址搜索和坐标转换', en: 'Choose a map service provider for address search and coordinate conversion' },
 	'settings.map.provider.option.none': { zh: '无', en: 'None' },
 	'settings.map.provider.option.gaode': { zh: '高德', en: 'Amap' },
+	'settings.map.provider.option.google': { zh: 'Google Maps', en: 'Google Maps' },
 	'settings.map.gaodeKey.name': { zh: '高德Web服务Key', en: 'Amap Web Service Key' },
 	'settings.map.gaodeKey.desc': { zh: '高德地图Web服务API密钥，用于地址搜索和坐标转换', en: 'API key for Amap map web services, used for address search and coordinate conversion' },
 	'settings.map.gaodeKey.placeholder': { zh: '请输入您的高德Web服务Key', en: 'Enter your Amap web service key' },
+	'settings.map.googleKey.name': { zh: 'Google Maps API Key', en: 'Google Maps API Key' },
+	'settings.map.googleKey.desc': { zh: 'Google Maps API密钥（需要启用 Maps JavaScript API、Places API 和 Geocoding API）', en: 'Google Maps API key (requires Maps JavaScript API, Places API, and Geocoding API enabled)' },
+	'settings.map.googleKey.placeholder': { zh: '请输入您的 Google Maps API Key', en: 'Enter your Google Maps API Key' },
 
 	// Story form
 	'form.editStory': { zh: '编辑事项', en: 'Edit Story' },
@@ -186,6 +190,10 @@ const dict: Dict = {
 	'map.clearConfirmMessage': { zh: '此操作将清除当前选中的地址信息，确定要继续吗？', en: 'This will clear the currently selected address information. Are you sure to continue?' },
 	'map.clearConfirmCancel': { zh: '取消', en: 'Cancel' },
 	'map.clearConfirmConfirm': { zh: '确定清除', en: 'Confirm Clear' },
+	'map.satellite': { zh: '卫星', en: 'SAT' },
+	'map.roadmap': { zh: '地图', en: 'Map' },
+	'map.provider.google': { zh: 'Google', en: 'Google' },
+	'map.provider.gaode': { zh: '高德', en: 'Gaode' },
 };
 
 function formatVars(input: string, vars?: Record<string, string | number>): string {

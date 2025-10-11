@@ -16,9 +16,10 @@ interface StoryListProps {
   stories: StoryWithDistance[];
   onStoriesChange?: (stories: StoryWithDistance[], options?: { needsResort?: boolean }) => void;
   settings: LifeFlowSettings;
+  updateSettings?: (newSettings: Partial<LifeFlowSettings>) => Promise<void>;
 }
 
-export default function StoryList({ stories, onStoriesChange, settings }: StoryListProps) {
+export default function StoryList({ stories, onStoriesChange, settings, updateSettings }: StoryListProps) {
   const [currentDate, setCurrentDate] = useState('');
   const [editingStory, setEditingStory] = useState(null as StoryWithDistance | null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -813,6 +814,7 @@ export default function StoryList({ stories, onStoriesChange, settings }: StoryL
         onNext={handleModalNext}
         onDelete={handleModalDelete}
         settings={settings}
+        updateSettings={updateSettings}
       />
     </div>
   );

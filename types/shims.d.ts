@@ -86,6 +86,82 @@ declare module 'toml' {
 declare global {
   interface Window {
     AMap: any;
+    google: any;
+  }
+  
+  // Google Maps API 类型声明
+  namespace google {
+    namespace maps {
+      class Map {
+        constructor(element: HTMLElement, options: any);
+        setCenter(latlng: any): void;
+        setZoom(zoom: number): void;
+        addListener(event: string, handler: Function): void;
+        fitBounds(bounds: any): void;
+      }
+      
+      class Marker {
+        constructor(options: any);
+        setPosition(position: any): void;
+        setTitle(title: string): void;
+        setMap(map: Map | null): void;
+        addListener(event: string, handler: Function): void;
+      }
+      
+      class LatLng {
+        constructor(lat: number, lng: number);
+        lat(): number;
+        lng(): number;
+      }
+      
+      class LatLngBounds {
+        constructor();
+        extend(point: LatLng): void;
+      }
+      
+      interface MapMouseEvent {
+        latLng: LatLng | null;
+      }
+      
+      // 控件位置枚举
+      enum ControlPosition {
+        BOTTOM_CENTER = 11,
+        BOTTOM_LEFT = 10,
+        BOTTOM_RIGHT = 12,
+        LEFT_BOTTOM = 6,
+        LEFT_CENTER = 4,
+        LEFT_TOP = 5,
+        RIGHT_BOTTOM = 9,
+        RIGHT_CENTER = 8,
+        RIGHT_TOP = 7,
+        TOP_CENTER = 2,
+        TOP_LEFT = 1,
+        TOP_RIGHT = 3
+      }
+      
+      // 地图类型控件样式
+      enum MapTypeControlStyle {
+        DEFAULT = 0,
+        HORIZONTAL_BAR = 1,
+        DROPDOWN_MENU = 2
+      }
+      
+      namespace places {
+        class PlacesService {
+          constructor(map: Map);
+          textSearch(request: any, callback: (results: any[], status: any) => void): void;
+        }
+        
+        enum PlacesServiceStatus {
+          OK = 'OK'
+        }
+      }
+      
+      class Geocoder {
+        constructor();
+        geocode(request: any, callback: (results: any[], status: string) => void): void;
+      }
+    }
   }
 }
 

@@ -45,8 +45,8 @@ export class CoordinateConverter {
       );
       const data = await response.json();
 
-      if (data.status === '1' && data.locations && data.locations.length > 0) {
-        const convertedCoord = data.locations[0].split(',').map(Number);
+      if (data.status === '1' && data.locations) {
+        const convertedCoord = data.locations.split(',').map(Number);
         console.log(`Web API coordinate conversion success: ${fromSystem} -> GCJ-02: ${lng}, ${lat} -> ${convertedCoord[0]}, ${convertedCoord[1]}`);
         return [convertedCoord[0], convertedCoord[1]];
       } else {

@@ -10,9 +10,10 @@ import StoryList from '../../components/StoryList';
 interface IndexProps {
   repository?: LifeFlowRepository | null;
   settings: LifeFlowSettings;
+  updateSettings?: (newSettings: Partial<LifeFlowSettings>) => Promise<void>;
 }
 
-export default function Index({ repository, settings }: IndexProps) {
+export default function Index({ repository, settings, updateSettings }: IndexProps) {
   const [stories, setStories] = useState([] as StoryWithDistance[]);
   const [loading, setLoading] = useState(true);
 
@@ -139,6 +140,7 @@ export default function Index({ repository, settings }: IndexProps) {
         stories={stories} 
         onStoriesChange={handleStoriesChange}
         settings={settings}
+        updateSettings={updateSettings}
       />
     </div>
   );
