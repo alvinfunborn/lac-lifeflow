@@ -14,19 +14,21 @@ import { t } from '../../../i18n';
  */
 export class AmapProvider implements IMapProvider {
   private apiKey: string;
+  private language: 'zh' | 'en';
   private mapInstance: any = null;
   private currentMarker: any = null;
   private availableProviders?: string[]; // 存储可用的地图提供商
   private clickHandler?: (lng: number, lat: number) => void; // 保存点击回调
   private currentMarkerPosition?: { lng: number; lat: number; title?: string }; // 保存当前标记位置
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, language: 'zh' | 'en' = 'zh') {
     this.apiKey = apiKey;
+    this.language = language;
   }
 
   async initMap(container: HTMLElement, initialLocation?: MapLocation, availableProviders?: string[]): Promise<void> {
     this.availableProviders = availableProviders; // 保存可用的地图提供商
-    const AMap = await loadAMapAPI(this.apiKey);
+    const AMap = await loadAMapAPI(this.apiKey, this.language);
     const config = createAmapConfig(this.apiKey);
     
     this.mapInstance = new AMap.Map(container, {
@@ -35,6 +37,7 @@ export class AmapProvider implements IMapProvider {
       center: config.center,
       mapStyle: config.mapStyle,
       resizeEnable: true,
+      dragEnable: true,  // 启用地图拖拽
       renderer: 'canvas',
       features: ['bg', 'road', 'building', 'point']
     });

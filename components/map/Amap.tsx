@@ -75,7 +75,7 @@ export const generateSecurityKey = (key: string, secret: string): string => {
 };
 
 // 地图API加载器
-export const loadAMapAPI = (apiKey?: string): Promise<any> => {
+export const loadAMapAPI = (apiKey?: string, language?: 'zh' | 'en'): Promise<any> => {
   return new Promise((resolve, reject) => {
     // 检查是否已经加载
     if (window.AMap) {
@@ -86,7 +86,8 @@ export const loadAMapAPI = (apiKey?: string): Promise<any> => {
     // 动态加载高德地图API（不包含插件，按需加载）
     const script = document.createElement('script');
     const securityKey = getSecurityKey(apiKey || '');
-    script.src = `https://webapi.amap.com/maps?v=2.0&key=${securityKey}`;
+    const lang = language === 'en' ? 'en' : 'zh_cn'; // 高德地图语言：zh_cn 或 en
+    script.src = `https://webapi.amap.com/maps?v=2.0&key=${securityKey}&lang=${lang}`;
     script.async = true;
     script.crossOrigin = 'anonymous';
     

@@ -61,7 +61,7 @@ const dict: Dict = {
 	'settings.usage': { zh: '使用说明：', en: 'Usage instructions:' },
 	'settings.usage.openView': { zh: '打开视图：按 Ctrl+P 搜索"LaC.LifeFlow: Open"命令，或在 Markdown 文件右键菜单中选择"用 LaC.LifeFlow 打开"', en: 'Open view: Press Ctrl+P to search for "LaC.LifeFlow: Open" command, or right-click on Markdown file and select "Open with LaC.LifeFlow"' },
 	'settings.usage.dataFormat': { zh: '数据格式：根文件包含事件引用列表，每个事件文件包含具体的TOML格式数据', en: 'Data format: Root file contains event references, each event file contains specific TOML format data' },
-	'settings.usage.mapFeature': { zh: '地图功能：配置高德地图API密钥后，可以在编辑事件时选择地址位置', en: 'Map feature: After configuring Gaode map API key, you can select address location when editing events' },
+	'settings.usage.mapFeature': { zh: '地图功能：配置高德地图API密钥后，可以在编辑事件时选择地址位置', en: 'Map feature: After configuring Amap API key, you can select address location when editing events' },
 	'settings.entryFile.name': { zh: '入口文件', en: 'Entry file' },
 	'settings.entryFile.desc': { zh: 'LifeFlow 数据文件的路径', en: 'Path to LifeFlow data file' },
 	'settings.contextMenu.name': { zh: '启用右键菜单', en: 'Enable context menu' },
@@ -193,7 +193,7 @@ const dict: Dict = {
 	'map.satellite': { zh: '卫星', en: 'SAT' },
 	'map.roadmap': { zh: '地图', en: 'Map' },
 	'map.provider.google': { zh: 'Google', en: 'Google' },
-	'map.provider.gaode': { zh: '高德', en: 'Gaode' },
+	'map.provider.gaode': { zh: '高德', en: 'Amap' },
 };
 
 function formatVars(input: string, vars?: Record<string, string | number>): string {

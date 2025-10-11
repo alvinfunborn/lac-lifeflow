@@ -17,16 +17,38 @@ declare const google: any;
  */
 export class GoogleMapProvider implements IMapProvider {
   private apiKey: string;
+  private language: 'zh' | 'en';
   private mapInstance: any = null;
   private currentMarker: any = null;
+  private containerElement: HTMLElement | null = null;
+  private eventListeners: Array<{ type: string; handler: EventListener; options?: any }> = [];
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, language: 'zh' | 'en' = 'en') {
     this.apiKey = apiKey;
+    this.language = language;
   }
 
   async initMap(container: HTMLElement, initialLocation?: MapLocation, availableProviders?: string[]): Promise<void> {
-    await loadGoogleMapsAPI(this.apiKey);
+    await loadGoogleMapsAPI(this.apiKey, this.language);
     const config = createGoogleMapConfig(this.apiKey);
+    
+    // 保存容器引用
+    this.containerElement = container;
+    
+    // 为谷歌地图容器添加事件阻止，防止触发 Obsidian 手势
+    const stopPropagation = (e: Event) => e.stopPropagation();
+    const addListener = (type: string, handler: EventListener, options?: any) => {
+      container.addEventListener(type, handler, options);
+      this.eventListeners.push({ type, handler, options });
+    };
+    
+    addListener('touchstart', stopPropagation, { passive: false });
+    addListener('touchmove', stopPropagation, { passive: false });
+    addListener('touchend', stopPropagation, { passive: false });
+    addListener('mousedown', stopPropagation);
+    addListener('mousemove', stopPropagation);
+    addListener('mouseup', stopPropagation);
+    addListener('wheel', stopPropagation, { passive: false });
     
     this.mapInstance = new google.maps.Map(container, {
       center: config.center,
@@ -286,6 +308,15 @@ export class GoogleMapProvider implements IMapProvider {
   }
 
   destroy(): void {
+    // 清理事件监听器
+    if (this.containerElement) {
+      this.eventListeners.forEach(({ type, handler, options }) => {
+        this.containerElement!.removeEventListener(type, handler, options);
+      });
+      this.eventListeners = [];
+      this.containerElement = null;
+    }
+    
     // Google Maps 不需要显式销毁
     this.mapInstance = null;
     this.currentMarker = null;

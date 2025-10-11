@@ -99,7 +99,7 @@ export class CoordinateConverter {
 }
 
 // 地图API加载器
-export const loadGoogleMapsAPI = (apiKey?: string): Promise<any> => {
+export const loadGoogleMapsAPI = (apiKey?: string, language?: 'zh' | 'en'): Promise<any> => {
   return new Promise((resolve, reject) => {
     // 检查是否已经加载
     if (window.google && window.google.maps) {
@@ -114,7 +114,8 @@ export const loadGoogleMapsAPI = (apiKey?: string): Promise<any> => {
 
     // 动态加载 Google Maps API（加载 marker 和 places 库）
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=__googleMapsCallback&loading=async&libraries=marker,places`;
+    const lang = language === 'zh' ? 'zh-CN' : 'en'; // Google Maps 语言：zh-CN 或 en
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=__googleMapsCallback&loading=async&libraries=marker,places&language=${lang}`;
     script.async = true;
     script.defer = true;
     script.crossOrigin = 'anonymous';  // 添加 CORS 支持

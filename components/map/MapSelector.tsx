@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapSelectorProps, MapLocation, MapSearchResult } from '../../types/map';
 import { MapProviderFactory } from './providers/MapProviderFactory';
 import { IMapProvider } from './providers/IMapProvider';
-import { t } from '../../i18n';
+import { t, getCurrentLocale } from '../../i18n';
 
 export default function MapSelector({
   visible,
@@ -61,8 +61,9 @@ export default function MapSelector({
         
         console.log('MapSelector: Available providers:', availableProviders);
 
-        // 创建地图提供商实例
-        const provider = MapProviderFactory.createProvider(settings.mapApiProvider, apiKey);
+        // 创建地图提供商实例（传递当前语言）
+        const currentLang = getCurrentLocale();
+        const provider = MapProviderFactory.createProvider(settings.mapApiProvider, apiKey, currentLang);
         providerRef.current = provider;
 
         // 初始化地图
@@ -153,7 +154,9 @@ export default function MapSelector({
 
         console.log('MapSelector: Switching to provider:', newProvider, 'available:', availableProviders);
 
-        const provider = MapProviderFactory.createProvider(newProvider, apiKey);
+        // 创建地图提供商实例（传递当前语言）
+        const currentLang = getCurrentLocale();
+        const provider = MapProviderFactory.createProvider(newProvider, apiKey, currentLang);
         providerRef.current = provider;
 
         if (mapContainerRef.current) {
@@ -417,13 +420,6 @@ export default function MapSelector({
           <div 
             ref={mapContainerRef} 
             className="lf-map-canvas"
-            onTouchStart={(e) => e.stopPropagation()}
-            onTouchMove={(e) => e.stopPropagation()}
-            onTouchEnd={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onMouseMove={(e) => e.stopPropagation()}
-            onMouseUp={(e) => e.stopPropagation()}
-            onWheel={(e) => e.stopPropagation()}
           />
           {!mapLoaded && (
             <div className="lf-map-loading">
