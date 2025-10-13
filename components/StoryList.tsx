@@ -566,24 +566,6 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
     };
   }, [isDragging]);
 
-  // 旧的上/下移动逻辑已移除（改为拖拽）
-
-  // 重新排序所有故事
-  const handleResort = () => {
-    const rawStories = stories.map(story => ({
-      name: story.name,
-      address: story.address,
-      start_time: story.start_time,
-      end_time: story.end_time,
-      description: story.description
-    }));
-    
-    // 重新排序
-    const reorderedStories = processStoriesWithDistance(rawStories);
-    
-    onStoriesChange?.(reorderedStories, { needsResort: true });
-  };
-
   // 处理点击"+"按钮新增story
   const handleAddNewStory = () => {
     // 创建空白草稿
