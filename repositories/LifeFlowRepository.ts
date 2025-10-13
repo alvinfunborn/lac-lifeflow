@@ -147,10 +147,73 @@ export class LifeFlowRepository {
         const existingFile = allFiles.find((file: TFile) => file.basename === storyId);
         
         if (existingFile) {
-            // 文件已存在，使用现有文件
-            targetFile = existingFile;
-            fileName = existingFile.name;
-            filePath = existingFile.path;
+            // 文件已存在，检查是否可以被toml解析
+            let canParse = false;
+            try {
+                const content = await this.app.vault.read(existingFile);
+                const quotedContent = this.quoteWikilinksForToml(content);
+                this.parseToml(quotedContent);
+                canParse = true;
+            } catch (e) {
+                console.log('⚠️ [saveStory] 文件存在但无法解析为TOML:', existingFile.path);
+                canParse = false;
+            }
+            
+            if (canParse) {
+                // 可以解析，使用现有文件
+                targetFile = existingFile;
+                fileName = existingFile.name;
+                filePath = existingFile.path;
+            } else {
+                // 无法解析，尝试用encodeName查找
+                const encodedName = encodeURIComponent(storyId);
+                const encodedFile = allFiles.find((file: TFile) => file.basename === encodedName);
+                
+                if (encodedFile) {
+                    // 检查encodedFile是否可以被toml解析
+                    let encodedCanParse = false;
+                    try {
+                        const content = await this.app.vault.read(encodedFile);
+                        const quotedContent = this.quoteWikilinksForToml(content);
+                        this.parseToml(quotedContent);
+                        encodedCanParse = true;
+                    } catch (e) {
+                        console.log('⚠️ [saveStory] encodedName文件存在但无法解析为TOML:', encodedFile.path);
+                        encodedCanParse = false;
+                    }
+                    
+                    if (encodedCanParse) {
+                        // 可以解析，使用encodedFile
+                        targetFile = encodedFile;
+                        fileName = encodedFile.name;
+                        filePath = encodedFile.path;
+                    } else {
+                        // encodedName也无法解析，添加时间戳后缀
+                        const timestamp = Date.now();
+                        const timestampedName = `${storyId}-${timestamp}`;
+                        const timestampedFileName = `${timestampedName}.md`;
+                        const timestampedFilePath = `${storiesFolder}/${timestampedFileName}`;
+                        
+                        const initialContent = this.dequoteWikilinks(this.storyToTomlString(story));
+                        await this.app.vault.create(timestampedFilePath, initialContent);
+                        targetFile = this.app.vault.getAbstractFileByPath(timestampedFilePath) as TFile;
+                        fileName = timestampedFileName;
+                        filePath = timestampedFilePath;
+                    }
+                } else {
+                    // encodedName不存在，添加时间戳后缀
+                    const timestamp = Date.now();
+                    const timestampedName = `${storyId}-${timestamp}`;
+                    const timestampedFileName = `${timestampedName}.md`;
+                    const timestampedFilePath = `${storiesFolder}/${timestampedFileName}`;
+                    
+                    const initialContent = this.dequoteWikilinks(this.storyToTomlString(story));
+                    await this.app.vault.create(timestampedFilePath, initialContent);
+                    targetFile = this.app.vault.getAbstractFileByPath(timestampedFilePath) as TFile;
+                    fileName = timestampedFileName;
+                    filePath = timestampedFilePath;
+                }
+            }
         } else {
             // 文件不存在，先尝试创建原名文件
             try {
