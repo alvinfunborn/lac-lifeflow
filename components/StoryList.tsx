@@ -9,7 +9,7 @@ import StoryEditModal from './StoryEditModal';
 import ConfirmModal from './modals/ConfirmModal';
 import SearchComponent from './SearchComponent';
 import { getTodayString } from '../utils/colorUtils';
-import { processStoriesWithDistance } from '../utils/dataParser';
+import { toPlainStories } from '../utils/dataParser';
 // 样式请统一写入插件根目录的 styles.css
 
 interface StoryListProps {
@@ -27,9 +27,17 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
   const [isCreatingDraft, setIsCreatingDraft] = useState(false);
   const [draftInsertIndex, setDraftInsertIndex] = useState(null as number | null);
   
-  // 重排序状态（仅用于unplanned卡片）
-  const [isReordering, setIsReordering] = useState(false);
-  const [reorderIndex, setReorderIndex] = useState(null as number | null);
+  // 拖拽重排序状态（仅用于unplanned卡片）
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedOriginalIndex, setDraggedOriginalIndex] = useState<number | null>(null);
+  const [dragStartClientY, setDragStartClientY] = useState<number>(0);
+  const [dragCurrentClientY, setDragCurrentClientY] = useState<number>(0);
+  // 用于渲染插入线：目标插入位置对应的 filtered 索引；若为末尾插入，则为 lastUnplannedAfterIndex+1
+  const [targetFilteredIndex, setTargetFilteredIndex] = useState<number | null>(null);
+  // 边缘自动滚动（拖拽期间）
+  const autoScrollRafIdRef = useRef<number | null>(null);
+  // 拖拽开始时的滚动位置
+  const dragStartScrollTopRef = useRef<number>(0);
 
   const [minimapSegments, setMinimapSegments] = useState<any[]>([]);
   const [scrollHeight, setScrollHeight] = useState(0);
@@ -53,6 +61,40 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const scrollViewRef = useRef<HTMLDivElement>(null);
   const dateOffsetRef = useRef(new Map());
+  // 根据当前顺序仅重算 distanceFromPrevious（不改变顺序）
+  const recalcDistancesKeepingOrder = (plainStories: any[]) => {
+    const getDateFromStart = (start?: string): string | undefined => {
+      if (!start) return undefined;
+      const m = start.match(/^(\d{4}-\d{2}-\d{2})/);
+      return m ? m[1] : undefined;
+    };
+    const result = plainStories.map(s => {
+      const date = getDateFromStart(s.start_time);
+      return {
+        id: s.id,
+        name: s.name,
+        address: s.address,
+        start_time: s.start_time,
+        end_time: s.end_time,
+        description: s.description,
+        hasDate: !!date,
+        date,
+        distanceFromPrevious: 0
+      } as StoryWithDistance;
+    });
+    let lastDate: string | undefined;
+    for (let i = 0; i < result.length; i++) {
+      const curDate = result[i].date;
+      if (curDate && lastDate) {
+        const d1 = new Date(lastDate);
+        const d2 = new Date(curDate);
+        const diffDays = Math.max(0, Math.ceil(Math.abs(d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24)) - 1);
+        result[i].distanceFromPrevious = diffDays;
+      }
+      if (curDate) lastDate = curDate;
+    }
+    return result;
+  };
 
 
   // 使用useLayoutEffect在DOM更新后计算minimap segments
@@ -303,29 +345,218 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
 
     const newStories = [...stories];
     newStories.splice(index, 1);
-    onStoriesChange?.(newStories);
+    // 删除后仅重算 dot 分隔（distanceFromPrevious），保持当前顺序
+    const plain = toPlainStories(newStories);
+    const recalculated = recalcDistancesKeepingOrder(plain);
+    onStoriesChange?.(recalculated);
     setIsModalVisible(false);
     setEditingStory(null);
   };
 
 
-  // 开始重排序（仅用于unplanned卡片）
-  const handleStartReorder = (index: number) => {
-    setIsReordering(true);
-    setReorderIndex(index);
+  // 计算 filteredIndex -> originalIndex 的映射
+  const getOriginalIndexByFiltered = (filteredIdx: number) => {
+    const story = filteredStories[filteredIdx];
+    return stories.findIndex(s => 
+      s.name === story.name && 
+      s.date === story.date && 
+      s.description === story.description &&
+      s.start_time === story.start_time &&
+      s.end_time === story.end_time &&
+      s.address?.name === story.address?.name
+    );
   };
 
-  // 结束重排序
-  const handleEndReorder = () => {
-    setIsReordering(false);
-    setReorderIndex(null);
+  // 计算 originalIndex -> filteredIndex 的映射
+  const getFilteredIndexByOriginal = (originalIdx: number) => {
+    const story = stories[originalIdx];
+    return filteredStories.findIndex(s => 
+      s.name === story.name && 
+      s.date === story.date && 
+      s.description === story.description &&
+      s.start_time === story.start_time &&
+      s.end_time === story.end_time &&
+      s.address?.name === story.address?.name
+    );
+  };
+
+  // 开始拖拽
+  const handleDragStart = (originalIndex: number, startClientY: number) => {
+    // 搜索模式下不允许拖拽
+    if (isSearching) return;
+    if (originalIndex < 0) return;
+
+    setIsDragging(true);
+    setDraggedOriginalIndex(originalIndex);
+    setDragStartClientY(startClientY);
+    setDragCurrentClientY(startClientY);
+    dragStartScrollTopRef.current = scrollViewRef.current?.scrollTop || 0;
+
+    // 初始计算一次插入位置
+    requestAnimationFrame(() => handleDragMove(startClientY));
+  };
+
+  // 根据 clientY 计算目标插入位置（以 filtered 索引为主，用于渲染占位线）
+  const updateTargetForClientY = (clientY: number) => {
+    if (!isDragging || draggedOriginalIndex === null) return;
+    // 构建所有候选 filtered 索引（排除正在拖拽的那一项）
+    const draggedFilteredIdx = getFilteredIndexByOriginal(draggedOriginalIndex);
+    const candidateFilteredIndices: number[] = [];
+    filteredStories.forEach((_s, fIdx) => {
+      if (fIdx !== draggedFilteredIdx) candidateFilteredIndices.push(fIdx);
+    });
+    if (candidateFilteredIndices.length === 0) {
+      setTargetFilteredIndex(null);
+      return;
+    }
+
+    // 通过 cardRefs 定位每个卡片的中心 Y，找到应插入的位置
+    let insertBeforeFilteredIdx: number | null = null;
+    for (let i = 0; i < candidateFilteredIndices.length; i++) {
+      const fIdx = candidateFilteredIndices[i];
+      const el = cardRefs.current[fIdx];
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (clientY < midY) {
+        insertBeforeFilteredIdx = fIdx;
+        break;
+      }
+    }
+
+    // 如果没有比任何 midY 更小，则插入到列表末尾
+    if (insertBeforeFilteredIdx === null) {
+      setTargetFilteredIndex(filteredStories.length);
+    } else {
+      setTargetFilteredIndex(insertBeforeFilteredIdx);
+    }
+  };
+
+  // 拖拽移动
+  const handleDragMove = (clientY: number) => {
+    if (!isDragging || draggedOriginalIndex === null) return;
+    setDragCurrentClientY(clientY);
+    updateTargetForClientY(clientY);
+
+    // 边缘自动滚动判定
+    const container = scrollViewRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const EDGE_THRESHOLD = 160; // px
+    const nearTop = clientY < rect.top + EDGE_THRESHOLD;
+    const nearBottom = clientY > rect.bottom - EDGE_THRESHOLD;
+
+    const startAutoScroll = () => {
+      if (autoScrollRafIdRef.current !== null) return; // 已在滚动
+      const step = () => {
+        if (!isDragging || !scrollViewRef.current) {
+          if (autoScrollRafIdRef.current !== null) {
+            cancelAnimationFrame(autoScrollRafIdRef.current);
+            autoScrollRafIdRef.current = null;
+          }
+          return;
+        }
+        const el = scrollViewRef.current;
+        const r = el.getBoundingClientRect();
+        const TOP_ZONE = r.top + EDGE_THRESHOLD;
+        const BOTTOM_ZONE = r.bottom - EDGE_THRESHOLD;
+        let delta = 0;
+        const MAX_SPEED = 24; // px per frame
+        if (dragCurrentClientY < TOP_ZONE) {
+          const intensity = Math.min(1, (TOP_ZONE - dragCurrentClientY) / EDGE_THRESHOLD);
+          delta = -Math.max(4, intensity * MAX_SPEED);
+        } else if (dragCurrentClientY > BOTTOM_ZONE) {
+          const intensity = Math.min(1, (dragCurrentClientY - BOTTOM_ZONE) / EDGE_THRESHOLD);
+          delta = Math.max(4, intensity * MAX_SPEED);
+        }
+        if (delta !== 0) {
+          el.scrollTop += delta;
+          // 滚动后需要基于同一个 clientY 重新计算插入位置
+          updateTargetForClientY(dragCurrentClientY);
+          autoScrollRafIdRef.current = requestAnimationFrame(step);
+        } else {
+          // 停止滚动
+          if (autoScrollRafIdRef.current !== null) {
+            cancelAnimationFrame(autoScrollRafIdRef.current);
+            autoScrollRafIdRef.current = null;
+          }
+        }
+      };
+      autoScrollRafIdRef.current = requestAnimationFrame(step);
+    };
+
+    const stopAutoScroll = () => {
+      if (autoScrollRafIdRef.current !== null) {
+        cancelAnimationFrame(autoScrollRafIdRef.current);
+        autoScrollRafIdRef.current = null;
+      }
+    };
+
+    if (nearTop || nearBottom) startAutoScroll(); else stopAutoScroll();
+  };
+
+  // 结束拖拽并提交顺序
+  const handleDragEnd = () => {
+    if (!isDragging || draggedOriginalIndex === null) {
+      // 清理状态
+      setIsDragging(false);
+      setDraggedOriginalIndex(null);
+      setTargetFilteredIndex(null);
+      return;
+    }
+
+    let newStories = [...stories];
+
+    // 计算目标 original 索引（仅在 unplanned 范围内插入）
+    let targetOriginalIndex: number | null = null;
+    if (targetFilteredIndex === null) {
+      // 未计算到插入位置则不改变顺序
+      targetOriginalIndex = null;
+    } else {
+      // 末尾插入
+      if (targetFilteredIndex >= filteredStories.length) targetOriginalIndex = stories.length;
+      else targetOriginalIndex = getOriginalIndexByFiltered(targetFilteredIndex);
+    }
+
+    // 若目标 originalIndex 存在，则执行重排（允许跨任意位置）
+    if (targetOriginalIndex !== null) {
+      const draggedStory = newStories[draggedOriginalIndex];
+      if (draggedStory) {
+        // 从原位置移除
+        newStories.splice(draggedOriginalIndex, 1);
+        // 由于移除了一个元素，若目标索引在原索引之后，需要减一
+        let adjustedTarget = targetOriginalIndex;
+        if (adjustedTarget > draggedOriginalIndex) adjustedTarget = adjustedTarget - 1;
+        if (adjustedTarget < 0) adjustedTarget = 0;
+        if (adjustedTarget > newStories.length) adjustedTarget = newStories.length;
+        newStories.splice(adjustedTarget, 0, draggedStory);
+      }
+    }
+
+    // 拖拽结束后仅重算 dot 分隔（distanceFromPrevious），保持当前顺序
+    const plain = toPlainStories(newStories);
+    const recalculated = recalcDistancesKeepingOrder(plain);
+    onStoriesChange?.(recalculated);
+
+    // 清理拖拽状态
+    setIsDragging(false);
+    setDraggedOriginalIndex(null);
+    setTargetFilteredIndex(null);
+    // 停止自动滚动
+    if (autoScrollRafIdRef.current !== null) {
+      cancelAnimationFrame(autoScrollRafIdRef.current);
+      autoScrollRafIdRef.current = null;
+    }
   };
 
   // 处理键盘事件
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isReordering) {
-        handleEndReorder();
+      if (event.key === 'Escape' && isDragging) {
+        // 取消拖拽（不提交变更）
+        setIsDragging(false);
+        setDraggedOriginalIndex(null);
+        setTargetFilteredIndex(null);
       }
     };
 
@@ -333,49 +564,9 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isReordering]);
+  }, [isDragging]);
 
-  // 上移unplanned卡片
-  const handleMoveUp = () => {
-    if (reorderIndex === null || reorderIndex <= 0) return;
-
-    // 移动事件向上
-
-    const newStories = [...stories];
-    const currentStory = newStories[reorderIndex];
-
-    // 移除当前卡片
-    newStories.splice(reorderIndex, 1);
-    // 插入到前一个位置
-    newStories.splice(reorderIndex - 1, 0, currentStory);
-
-    // 更新事件顺序
-
-    // 更新索引
-    setReorderIndex(reorderIndex - 1);
-    onStoriesChange?.(newStories);
-  };
-
-  // 下移unplanned卡片
-  const handleMoveDown = () => {
-    if (reorderIndex === null || reorderIndex >= stories.length - 1) return;
-
-    // 移动事件向下
-
-    const newStories = [...stories];
-    const currentStory = newStories[reorderIndex];
-
-    // 移除当前卡片
-    newStories.splice(reorderIndex, 1);
-    // 插入到下一个位置
-    newStories.splice(reorderIndex + 1, 0, currentStory);
-
-    // 更新事件顺序
-
-    // 更新索引
-    setReorderIndex(reorderIndex + 1);
-    onStoriesChange?.(newStories);
-  };
+  // 旧的上/下移动逻辑已移除（改为拖拽）
 
   // 重新排序所有故事
   const handleResort = () => {
@@ -710,12 +901,20 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
       
       // 插入横向点分隔
       const hasSeparator = filteredIndex > 0 && story.distanceFromPrevious > 0;
+
+      // 在有分隔符的情形下，插入线应显示在分隔符上方（更靠近上一卡片）
+      if (isDragging && targetFilteredIndex === filteredIndex) {
+        elements.push(
+          <div key={`insert-line-before-${filteredIndex}`} className="drag-insert-line" />
+        );
+      }
+
       if (hasSeparator) {
         elements.push(
           <DayDotSeparator key={`dot-separator-${filteredIndex}`} count={story.distanceFromPrevious} />
         );
       }
-      
+
       const isDayStartWithoutSeparator = !isSameDay && filteredIndex > 0 && !hasSeparator;
       const isUnplanned = !story.date;
       const shouldUseDayStart = isDayStartWithoutSeparator || (isUnplanned && !isSameDay);
@@ -723,13 +922,23 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
       const shouldUseSameDay = isSameDay;
 
 
+      // 无需再次插入，避免重复
+
+      const isCardDragging = isDragging && draggedOriginalIndex === storyIndex;
+
+      // 计算本卡片的拖拽偏移（通过 CSS 变量传递给样式）
+      const currentScrollTop = scrollViewRef.current?.scrollTop || 0;
+      const scrollDelta = currentScrollTop - dragStartScrollTopRef.current;
+      const dragOffset = isCardDragging ? (dragCurrentClientY - dragStartClientY + scrollDelta) : 0;
+
       elements.push(
         <div 
           key={`story-${filteredIndex}`}
           ref={(el) => {
             cardRefs.current[filteredIndex] = el;
           }}
-          className={`story-wrapper ${shouldUseSameDay ? 'same-day' : ''}${shouldUseDayStart ? ' day-start' : ''}${isReordering && reorderIndex === storyIndex ? ' reordering' : ''}`}
+          className={`story-wrapper ${shouldUseSameDay ? 'same-day' : ''}${shouldUseDayStart ? ' day-start' : ''}${isCardDragging ? ' dragging-wrapper' : ''}`}
+          style={isCardDragging ? ({ ['--drag-offset' as any]: `${dragOffset}px` } as React.CSSProperties) : undefined}
         >
           <StoryCard
             story={story}
@@ -738,11 +947,10 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
             sameDayPosition={sameDayPosition}
             allStories={stories}
             onClick={handleStoryClick}
-            onLongPress={isUnplanned ? () => handleStartReorder(storyIndex) : undefined}
-            isReordering={isReordering && reorderIndex === storyIndex}
-            onMoveUp={handleMoveUp}
-            onMoveDown={handleMoveDown}
-            onEndReorder={handleEndReorder}
+            onDragStart={isUnplanned ? (_s, startY) => handleDragStart(storyIndex, startY) : undefined}
+            onDragMove={handleDragMove}
+            onDragEnd={handleDragEnd}
+            isDragging={isCardDragging}
           />
         </div>
       );
@@ -753,18 +961,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
 
   return (
     <div className='story-list-container' ref={containerRef}>
-      {/* 重排序蒙版 */}
-      {isReordering && reorderIndex !== null && (
-        <>
-          {/* 蒙版背景 - 处理点击退出，但允许重排序按钮区域通过 */}
-          <div
-            className="reorder-mask-background"
-            onClick={handleEndReorder}
-          />
-          {/* 重排序按钮区域 - 阻止蒙版点击事件 */}
-          <div className="reorder-button-area" />
-        </>
-      )}
+      {/* 拖拽排序无需蒙版 */}
       
       <div
         className='story-list'
@@ -772,6 +969,10 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
         ref={scrollViewRef}
       >
         {renderStories()}
+        {/* 若目标插入在最后一个可见元素之后，追加一条插入线 */}
+        {isDragging && targetFilteredIndex !== null && targetFilteredIndex >= filteredStories.length && (
+          <div className="drag-insert-line" />
+        )}
         <div className="add-story-button-wrapper">
           <button className="add-story-button" onClick={handleAddNewStory} title={t('common.add') || '新增Story'}>
             <span className="add-story-icon">+</span>

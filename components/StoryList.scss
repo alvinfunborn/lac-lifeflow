@@ -83,6 +83,7 @@
     transition: all 0.3s ease;
     margin-bottom: 0;
     margin-top: 0;
+    will-change: transform;
     
     // 循环标识（可选，用于调试）
     &.cycle-indicator {
@@ -106,49 +107,36 @@
     &.day-start {
       padding-top: 4px;
     }
-    // 重排序状态下的story-wrapper
-    &.reordering {
+  // 拖拽排序不再需要 wrapper 的 reordering 样式
+    &.dragging-wrapper {
       position: relative;
-      z-index: 1010;
+      z-index: 10050;
+      transform: translateY(var(--drag-offset, 0px));
     }
   }
   
 }
 
-// 重排序蒙版容器
-.reorder-mask-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  pointer-events: none; // 容器不拦截事件
+// 拖拽插入线样式
+.drag-insert-line {
+  height: 4px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    $packers-gold 20%, 
+    $packers-gold 80%, 
+    transparent
+  );
+  border-radius: 2px;
+  margin: 8px 0;
+  animation: pulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba($packers-gold, 0.6);
+  position: relative;
+  z-index: 1011; // 盖过同日叠放
 }
 
-// 重排序蒙版背景（专门处理点击退出）
-.reorder-mask-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3); // 半透明背景
-  cursor: pointer;
-  pointer-events: auto; // 专门处理点击退出
-  z-index: 1002; // 提高z-index，确保能处理点击
-}
-
-// 重排序按钮区域 - 阻止蒙版点击事件
-.reorder-button-area {
-  position: fixed;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 64px;
-  height: 120px;
-  z-index: 1014;
-  pointer-events: none;
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; transform: scaleX(0.95); }
+  50% { opacity: 1; transform: scaleX(1); }
 }
 
 // 重排序模式下的卡片样式

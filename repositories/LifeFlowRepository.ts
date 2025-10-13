@@ -323,8 +323,6 @@ export class LifeFlowRepository {
         //    将 [[xxx]]\n\n 或 [[xxx]]\n[xxx.xxx]\n 等模式简化为 [[xxx]]\n
         finalContent = finalContent.replace(/(\[\[[^\]]+\]\])\s*\n\s*\n/g, '$1\n');
 
-        console.log('🔍 [updateRootFile] Final content:', finalContent);
-
         const existingRoot = this.app.vault.getAbstractFileByPath(rootPath);
         if (existingRoot && existingRoot instanceof TFile) {
             await this.app.vault.modify(existingRoot, finalContent);

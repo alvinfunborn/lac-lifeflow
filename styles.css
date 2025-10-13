@@ -79,6 +79,7 @@
   transition: all 0.3s ease;
   margin-bottom: 0;
   margin-top: 0;
+  will-change: transform;
 }
 .story-list-container .story-wrapper.cycle-indicator {
   position: relative;
@@ -99,44 +100,33 @@
 .story-list-container .story-wrapper.day-start {
   padding-top: 4px;
 }
-.story-list-container .story-wrapper.reordering {
+.story-list-container .story-wrapper.dragging-wrapper {
   position: relative;
-  z-index: 1010;
+  z-index: 10050;
+  transform: translateY(var(--drag-offset, 0px));
 }
 
-.reorder-mask-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  pointer-events: none;
+.drag-insert-line {
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #FFB612 20%, #FFB612 80%, transparent);
+  border-radius: 2px;
+  margin: 8px 0;
+  animation: pulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(255, 182, 18, 0.6);
+  position: relative;
+  z-index: 1011;
 }
 
-.reorder-mask-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  pointer-events: auto;
-  z-index: 1002;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scaleX(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 }
-
-.reorder-button-area {
-  position: fixed;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 64px;
-  height: 120px;
-  z-index: 1014;
-  pointer-events: none;
-}
-
 .story-card.reordering {
   position: relative;
   z-index: 1009;
@@ -180,6 +170,13 @@
 .story-card:active {
   transform: scale(0.98);
   box-shadow: 0 1px 4px rgba(32, 55, 49, 0.15);
+}
+.story-card.dragging {
+  position: relative;
+  z-index: 10060;
+  transform: scale(0.92);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5) !important;
+  cursor: grabbing;
 }
 .story-card:hover {
   box-shadow: 0 4px 12px rgba(32, 55, 49, 0.15);
@@ -299,77 +296,6 @@
   display: block;
   margin-bottom: 2px;
   line-height: 1.3;
-}
-
-.reorder-controls {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 0px;
-  z-index: 1012;
-}
-
-.reorder-btn {
-  width: 48px;
-  height: 48px;
-  border: none !important;
-  border-radius: 0;
-  background: none !important;
-  color: #FFB612;
-  font-size: 0;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: none !important;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  outline: none;
-  padding: 0;
-  overflow: visible;
-  z-index: 1013;
-  position: relative;
-}
-.reorder-btn span {
-  font-size: 48px;
-  font-weight: 500;
-  line-height: 1;
-  display: block;
-  transition: all 0.2s ease;
-  text-align: center;
-}
-.reorder-btn .arrow-up {
-  transform: rotate(-90deg);
-}
-.reorder-btn .arrow-down {
-  transform: rotate(-90deg);
-}
-.reorder-btn:hover {
-  background: none !important;
-  transform: scale(1.2);
-  color: white;
-}
-.reorder-btn:active {
-  transform: scale(0.9);
-}
-.reorder-btn:focus {
-  outline: none;
-}
-.reorder-btn.reordering {
-  background: rgba(255, 193, 7, 0.2) !important;
-  border: 2px solid #FFB612 !important;
-  box-shadow: 0 4px 16px rgba(255, 193, 7, 0.3) !important;
-}
-.reorder-btn.reordering:active {
-  transform: scale(0.98);
-  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4) !important;
 }
 
 /* Time input group styles */

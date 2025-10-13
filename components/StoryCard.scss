@@ -28,6 +28,15 @@
     box-shadow: 0 1px 4px rgba(32, 55, 49, 0.15);
   }
 
+  // 拖拽中的视觉效果
+  &.dragging {
+    position: relative;
+    z-index: 10060; // 高于 wrapper(10050) 及插入线(1011)
+    transform: scale(0.92);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5) !important;
+    cursor: grabbing;
+  }
+
   // 悬停效果
   &:hover {
     box-shadow: 0 4px 12px rgba(32, 55, 49, 0.15);
@@ -182,88 +191,7 @@
   }
 }
 
-// 重排序控制按钮
-.reorder-controls {
-  position: absolute;
-  right: 12px; // 增加右边距
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  justify-content: center; // 确保垂直居中
-  align-items: center; // 确保水平居中
-  gap: 0px; // 增加按钮间距
-  z-index: 1012; // 提高z-index，确保在蒙版之上
-}
-
-.reorder-btn {
-  width: 48px; // 稍微减小按钮大小
-  height: 48px;
-  border: none !important;
-  border-radius: 0;
-  background: none !important; // 彻底去掉背景
-  color: $packers-gold;
-  font-size: 0; // 隐藏文字，只显示SVG
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: none !important; // 彻底去掉阴影
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  outline: none; // 去掉焦点轮廓
-  padding: 0; // 去掉内边距
-  overflow: visible; // 确保图标不被裁剪
-  z-index: 1013; // 提高z-index，确保在蒙版之上
-  position: relative;
-
-  // 简单的旋转字符
-  span {
-    font-size: 48px;
-    font-weight: 500;
-    line-height: 1;
-    display: block;
-    transition: all 0.2s ease;
-    text-align: center;
-  }
-
-  .arrow-up {
-    transform: rotate(-90deg);
-  }
-
-  .arrow-down {
-    transform: rotate(-90deg);
-  }
-
-  &:hover {
-    background: none !important;
-    transform: scale(1.2);
-    color: white;
-  }
-
-  &:active {
-    transform: scale(0.9);
-  }
-
-  &:focus {
-    outline: none; // 去掉焦点轮廓
-  }
-
-  // 重排序模式高亮
-  &.reordering {
-    background: rgba(255, 193, 7, 0.2) !important; // 浅金色背景
-    border: 2px solid $packers-gold !important; // 金色边框
-    box-shadow: 0 4px 16px rgba(255, 193, 7, 0.3) !important; // 金色阴影
-
-    // 确保在重排序模式下点击效果仍然正常
-    &:active {
-      transform: scale(0.98);
-      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4) !important;
-    }
-  }
-} 
+// 旧的重排序按钮与样式已移除
 
 
 /* Time input group styles */
