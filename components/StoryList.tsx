@@ -393,6 +393,25 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
     onStoriesChange?.(reorderedStories, { needsResort: true });
   };
 
+  // 处理点击"+"按钮新增story
+  const handleAddNewStory = () => {
+    // 创建空白草稿
+    const draftStory: StoryWithDistance = {
+      name: '',
+      address: { name: '' },
+      start_time: '',
+      end_time: '',
+      description: '',
+      distanceFromPrevious: 0,
+      hasDate: false
+    };
+
+    setEditingStory(draftStory);
+    setIsCreatingDraft(true);
+    setDraftInsertIndex(stories.length); // 插入到列表末尾
+    setIsModalVisible(true);
+  };
+
   const handleScroll = React.useCallback(() => {
     if (!scrollViewRef.current) return;
     const scrollEl = scrollViewRef.current;
@@ -753,6 +772,11 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
         ref={scrollViewRef}
       >
         {renderStories()}
+        <div className="add-story-button-wrapper">
+          <button className="add-story-button" onClick={handleAddNewStory} title={t('common.add') || '新增Story'}>
+            <span className="add-story-icon">+</span>
+          </button>
+        </div>
       </div>
       
       <DateNavigation 
