@@ -88,19 +88,13 @@ The plugin creates the following files in the specified folder:
 
 ## Installation
 
-### Method 1: From Obsidian Community Plugins (Recommended)
-1. Open Obsidian Settings
-2. Navigate to Community Plugins and disable Safe Mode
-3. Click Browse and search for "LaC.LifeFlow"
-4. Click Install, then Enable
-
-### Method 2: Using BRAT (Beta Reviewers Auto-update Tester)
+### Method 1: Using BRAT (Beta Reviewers Auto-update Tester)
 1. Install BRAT plugin from Community Plugins
 2. Open BRAT settings
 3. Click "Add Beta plugin" and enter: `alvinfunborn/lac-lifeflow`
 4. Enable the plugin in Community Plugins
 
-### Method 3: Manual Installation
+### Method 2: Manual Installation
 1. Download the latest release from GitHub
 2. Extract the files to `.obsidian/plugins/lac-lifeflow/` directory
 3. Enable the plugin in Obsidian Settings

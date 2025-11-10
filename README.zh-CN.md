@@ -88,19 +88,13 @@ coordinate_system = "GCJ-02"
 
 ## 安装方法
 
-### 方法 1: 从 Obsidian 社区插件安装（推荐）
-1. 打开 Obsidian 设置
-2. 进入"第三方插件"，关闭安全模式
-3. 点击"浏览"，搜索 "LaC.LifeFlow"
-4. 点击"安装"，然后"启用"
-
-### 方法 2: 使用 BRAT 插件
+### 方法 1: 使用 BRAT 插件
 1. 从社区插件安装 BRAT 插件
 2. 打开 BRAT 设置
 3. 点击 "Add Beta plugin"，输入：`alvinfunborn/lac-lifeflow`
 4. 在第三方插件中启用本插件
 
-### 方法 3: 手动安装
+### 方法 2: 手动安装
 1. 从 GitHub 下载最新版本
 2. 解压到 `.obsidian/plugins/lac-lifeflow/` 目录
 3. 在 Obsidian 设置中启用插件
