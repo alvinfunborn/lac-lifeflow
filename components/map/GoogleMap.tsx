@@ -19,7 +19,7 @@ export class CoordinateConverter {
   public static gcj02ToWgs84(lng: number, lat: number): [number, number] {
     const a = 6378245.0; // 长半轴
     const ee = 0.00669342162296594323; // 扁率
-    
+
     let dLat = this.transformLat(lng - 105.0, lat - 35.0);
     let dLng = this.transformLng(lng - 105.0, lat - 35.0);
     const radLat = (lat / 180.0) * Math.PI;
@@ -28,10 +28,10 @@ export class CoordinateConverter {
     const sqrtMagic = Math.sqrt(magic);
     dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
     dLng = (dLng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
-    
+
     const wgsLat = lat - dLat;
     const wgsLng = lng - dLng;
-    
+
     return [wgsLng, wgsLat];
   }
 
@@ -41,7 +41,7 @@ export class CoordinateConverter {
   public static wgs84ToGcj02(lng: number, lat: number): [number, number] {
     const a = 6378245.0;
     const ee = 0.00669342162296594323;
-    
+
     let dLat = this.transformLat(lng - 105.0, lat - 35.0);
     let dLng = this.transformLng(lng - 105.0, lat - 35.0);
     const radLat = (lat / 180.0) * Math.PI;
@@ -50,10 +50,10 @@ export class CoordinateConverter {
     const sqrtMagic = Math.sqrt(magic);
     dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
     dLng = (dLng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
-    
+
     const gcjLat = lat + dLat;
     const gcjLng = lng + dLng;
-    
+
     return [gcjLng, gcjLat];
   }
 
@@ -82,17 +82,17 @@ export class CoordinateConverter {
    */
   public static async convertToWgs84(lng: number, lat: number, fromSystem: string): Promise<[number, number]> {
     const coordSystemLower = (fromSystem || '').toLowerCase();
-    
+
     // 如果已经是WGS84，直接返回
     if (coordSystemLower === 'wgs84' || coordSystemLower === 'gps' || coordSystemLower === 'wgs-84') {
       return [lng, lat];
     }
-    
+
     // GCJ-02 转 WGS84
     if (coordSystemLower === 'gcj-02' || coordSystemLower === 'gcj02') {
       return this.gcj02ToWgs84(lng, lat);
     }
-    
+
     console.warn(`Unsupported coordinate system: ${fromSystem}, returning original coordinates`);
     return [lng, lat];
   }
@@ -119,7 +119,7 @@ export const loadGoogleMapsAPI = (apiKey?: string, language?: 'zh' | 'en'): Prom
     script.async = true;
     script.defer = true;
     script.crossOrigin = 'anonymous';  // 添加 CORS 支持
-    
+
     // 使用回调函数确保API加载完成
     (window as any).__googleMapsCallback = () => {
       if (window.google && window.google.maps) {
@@ -129,20 +129,20 @@ export const loadGoogleMapsAPI = (apiKey?: string, language?: 'zh' | 'en'): Prom
         reject(new Error('Google Maps API failed to load'));
       }
     };
-    
+
     script.onerror = () => {
       delete (window as any).__googleMapsCallback;
       reject(new Error('Failed to load Google Maps API script'));
     };
-    
+
     document.head.appendChild(script);
   });
 };
 
 // 使用新的 Places API (searchByText) 搜索地点
 export const searchPlacesByGoogleAPI = async (keyword: string, apiKey: string, mapInstance?: any): Promise<any[]> => {
-  console.log(`Searching for: "${keyword}"`);
-  
+
+
   try {
     // 确保 Google Maps API 已加载
     if (!window.google || !window.google.maps) {
@@ -151,7 +151,7 @@ export const searchPlacesByGoogleAPI = async (keyword: string, apiKey: string, m
 
     // 使用新的 Place.searchByText API (无需临时地图)
     const { Place } = await (google.maps as any).importLibrary('places');
-    
+
     // 构建请求参数
     const request: any = {
       textQuery: keyword,
@@ -165,7 +165,7 @@ export const searchPlacesByGoogleAPI = async (keyword: string, apiKey: string, m
       if (bounds) {
         // 使用当前地图视图范围作为 locationBias
         request.locationBias = bounds;
-        console.log('  Using map viewport as location bias');
+
       } else {
         // 如果无法获取边界,使用地图中心作为偏好
         const center = mapInstance.getCenter();
@@ -174,20 +174,20 @@ export const searchPlacesByGoogleAPI = async (keyword: string, apiKey: string, m
             center: { lat: center.lat(), lng: center.lng() },
             radius: 50000  // 50km 半径
           };
-          console.log('  Using map center as location bias');
+
         }
       }
     }
     // 如果没有地图实例,不设置 locationBias,使用全球搜索
 
     const { places } = await Place.searchByText(request);
-    
+
     if (places && places.length > 0) {
       const searchResults = places.map((place: any) => {
         const name = place.displayName || keyword;
         const address = place.formattedAddress || '';
         const location = place.location;
-        
+
         return {
           name,
           address,
@@ -200,11 +200,11 @@ export const searchPlacesByGoogleAPI = async (keyword: string, apiKey: string, m
           }
         };
       });
-      
-      console.log(`Found ${searchResults.length} results from Google Places (new API) for "${keyword}"`);
+
+
       return searchResults;
     } else {
-      console.log(`No results found for "${keyword}"`);
+
       return [];
     }
   } catch (error) {
@@ -228,10 +228,10 @@ export const getAddressByCoordinates = async (lng: number, lat: number, apiKey: 
       geocoder.geocode({ location: latlng }, (results, status) => {
         if (status === 'OK' && results && results[0]) {
           const result = results[0];
-          
+
           // 智能提取地点名称
           let name = '';
-          
+
           // 策略1: 查找 POI 类型的组件（point_of_interest, establishment 等）
           if (result.address_components) {
             for (const component of result.address_components) {
@@ -244,7 +244,7 @@ export const getAddressByCoordinates = async (lng: number, lat: number, apiKey: 
               }
             }
           }
-          
+
           // 策略2: 如果没有找到 POI，使用地区名称（neighborhood, locality, sublocality）
           if (!name && result.address_components) {
             for (const component of result.address_components) {
@@ -256,7 +256,7 @@ export const getAddressByCoordinates = async (lng: number, lat: number, apiKey: 
               }
             }
           }
-          
+
           // 策略3: 使用格式化地址的第一部分（去掉门牌号）
           if (!name && result.formatted_address) {
             const parts = result.formatted_address.split(',');
@@ -271,8 +271,8 @@ export const getAddressByCoordinates = async (lng: number, lat: number, apiKey: 
             }
           }
 
-          console.log(`逆地理编码成功: ${lng}, ${lat} -> ${name} (${result.formatted_address})`);
-          
+
+
           resolve({
             longitude: lng,
             latitude: lat,
@@ -281,7 +281,7 @@ export const getAddressByCoordinates = async (lng: number, lat: number, apiKey: 
             coordinate_system: 'WGS84'
           });
         } else {
-          console.log(`逆地理编码失败: ${lng}, ${lat}`);
+
           resolve(null);
         }
       });
@@ -295,11 +295,11 @@ export const getAddressByCoordinates = async (lng: number, lat: number, apiKey: 
 // IP定位功能（使用浏览器定位API）
 export const getCurrentLocationByIP = async (): Promise<MapLocation | null> => {
   try {
-    console.log('开始浏览器定位...');
-    
+
+
     return new Promise((resolve) => {
       if (!navigator.geolocation) {
-        console.log('浏览器不支持定位，返回默认位置（北京）');
+
         resolve({
           longitude: 116.4074,
           latitude: 39.9042,
@@ -311,7 +311,7 @@ export const getCurrentLocationByIP = async (): Promise<MapLocation | null> => {
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log('浏览器定位成功:', position.coords);
+
           resolve({
             longitude: position.coords.longitude,
             latitude: position.coords.latitude,
@@ -320,7 +320,7 @@ export const getCurrentLocationByIP = async (): Promise<MapLocation | null> => {
           });
         },
         (error) => {
-          console.log('浏览器定位失败，返回默认位置（北京）:', error);
+
           resolve({
             longitude: 116.4074,
             latitude: 39.9042,

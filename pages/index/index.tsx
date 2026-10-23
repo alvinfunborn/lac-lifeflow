@@ -29,7 +29,7 @@ export default function Index({ repository, settings, updateSettings }: IndexPro
         setLoading(false);
         return;
       }
-      
+
       const rawStories = await repository.loadAll();
       const processedStories = processStoriesWithDistance(rawStories);
       setStories(processedStories);
@@ -42,13 +42,13 @@ export default function Index({ repository, settings, updateSettings }: IndexPro
   };
 
   const handleStoriesChange = async (updatedStories: StoryWithDistance[], options?: { needsResort?: boolean }) => {
-    
+
     setStories(updatedStories);
-    
+
     if (!repository) {
       return;
     }
-    
+
     try {
       // 如果需要重新排序，重新加载数据
       if (options?.needsResort) {
@@ -56,10 +56,10 @@ export default function Index({ repository, settings, updateSettings }: IndexPro
       } else {
         // 检查是否有新增或修改的故事
         const changedStories: StoryWithDistance[] = [];
-        
+
         // 检查长度变化（新增或删除）
         if (updatedStories.length !== stories.length) {
-          console.log('🔍 [handleStoriesChange] Length changed:', stories.length, '->', updatedStories.length);
+
           // 找出所有新增的故事
           updatedStories.forEach((story, index) => {
             if (!stories[index] || story !== stories[index]) {
@@ -74,20 +74,15 @@ export default function Index({ repository, settings, updateSettings }: IndexPro
             }
           });
         }
-        
-        console.log('🔍 [handleStoriesChange] Changed stories count:', changedStories.length);
-        
+
+
+
         // 保存所有变化的故事，并收集保存后的 ID
         const savedStoryIds = new Map<StoryWithDistance, string>();
-        
+
         for (const changedStory of changedStories) {
-          console.log('🔍 [handleStoriesChange] Saving story:', {
-            id: changedStory.id,
-            name: changedStory.name,
-            originalId: changedStory.id,
-            address: changedStory.address
-          });
-          
+
+
           // 移除 distanceFromPrevious 等额外字段，只保存纯 Story 数据
           const plainStory = {
             id: changedStory.id,
@@ -97,15 +92,15 @@ export default function Index({ repository, settings, updateSettings }: IndexPro
             description: changedStory.description,
             address: changedStory.address
           };
-          
-          console.log('🔍 [handleStoriesChange] Plain story to save:', plainStory);
+
+
           await repository.saveStory(plainStory);
-          
+
           // 保存后，plainStory.id 会被更新为实际的文件名
-          console.log('🔍 [handleStoriesChange] Story saved with ID:', plainStory.id);
+
           savedStoryIds.set(changedStory, plainStory.id!);
         }
-        
+
         // 更新根文件，确保引用顺序与故事列表一致
         // 使用保存后的 ID
         const plainStories = updatedStories.map(story => {

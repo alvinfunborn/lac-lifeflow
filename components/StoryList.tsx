@@ -26,7 +26,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
   // 创建"下一事项"的临时草稿状态（仅在保存时插入）
   const [isCreatingDraft, setIsCreatingDraft] = useState(false);
   const [draftInsertIndex, setDraftInsertIndex] = useState(null as number | null);
-  
+
   // 拖拽重排序状态（仅用于unplanned卡片）
   const [isDragging, setIsDragging] = useState(false);
   const [draggedOriginalIndex, setDraggedOriginalIndex] = useState<number | null>(null);
@@ -43,16 +43,16 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
   const [scrollHeight, setScrollHeight] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
-  
+
   // 搜索状态
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredStories, setFilteredStories] = useState(stories);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   // 初始滚动状态
   const [hasInitialScrolled, setHasInitialScrolled] = useState(false);
   const [lastScrollStoriesCount, setLastScrollStoriesCount] = useState(0);
-  
+
   // 保存删除前的滚动位置
   const [savedScrollPosition, setSavedScrollPosition] = useState(null as number | null);
   const [shouldRestoreScroll, setShouldRestoreScroll] = useState(false);
@@ -109,7 +109,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
 
       // 简化：只计算有效的cardRefs，跳过null的
       const validCardCount = cardRefs.current.filter(ref => ref !== null).length;
-      
+
       // 如果有效card数量太少，延迟重试
       if (validCardCount < stories.length * 0.8) { // 至少80%的cards要准备好
         setTimeout(calculateSegments, 50);
@@ -167,17 +167,17 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
         s.end_time === story.end_time &&
         s.address?.name === story.address?.name
       );
-      
+
       if (originalIndex !== -1) {
         // 先清空搜索，恢复完整列表
         setSearchQuery('');
         setFilteredStories(stories);
         setIsSearching(false);
-        
+
         // 使用更可靠的滚动逻辑
         const scrollToPosition = () => {
           if (!scrollViewRef.current) return;
-          
+
           // 等待DOM更新完成
           requestAnimationFrame(() => {
             // 重新计算cardRefs
@@ -187,7 +187,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
               setTimeout(scrollToPosition, 100);
               return;
             }
-            
+
             let totalHeight = 0;
             for (let i = 0; i < originalIndex && i < allCards.length; i++) {
               const cardEl = allCards[i] as HTMLElement;
@@ -195,7 +195,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
                 totalHeight += cardEl.offsetHeight;
               }
             }
-            
+
             // 滚动到目标位置，留一些边距
             const targetScrollTop = Math.max(0, totalHeight - 150);
             if (scrollViewRef.current) {
@@ -206,7 +206,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
             }
           });
         };
-        
+
         // 延迟执行，确保DOM更新完成
         setTimeout(scrollToPosition, 200);
       } else {
@@ -217,13 +217,9 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
       }
       return;
     }
-    
+
     // 正常情况下的编辑逻辑
-    console.log('🔍 [handleStoryClick] Original story:', {
-      id: story.id,
-      name: story.name,
-      hasId: !!story.id
-    });
+
     setEditingStory(story);
     setIsModalVisible(true);
   };
@@ -250,17 +246,17 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
       // 如果是草稿，直接插入到指定位置
       const newStories = [...stories];
       const insertAt = draftInsertIndex ?? newStories.length;
-      
+
       newStories.splice(insertAt, 0, updatedStory);
-      
-      
+
+
       // 如果新故事有时间，需要重新排序
       if (updatedStory.start_time || updatedStory.end_time) {
         onStoriesChange?.(newStories, { needsResort: true });
       } else {
         onStoriesChange?.(newStories);
       }
-      
+
       setIsCreatingDraft(false);
       setDraftInsertIndex(null);
     } else {
@@ -268,8 +264,8 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
       const updatedStories = stories.map(story =>
         story === editingStory ? updatedStory : story
       );
-      
-      
+
+
       // 检查时间是否发生变化，如果变化则需要重新排序
       const timeChanged = editingStory?.start_time !== updatedStory.start_time || 
                          editingStory?.end_time !== updatedStory.end_time;
@@ -658,7 +654,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
     if (!hasInitialScrolled && filteredStories.length > 0 && scrollViewRef.current) {
       let retryCount = 0;
       const maxRetries = 50; // 增加最大重试次数，给DOM更多时间准备
-      
+
       const scrollToToday = () => {
         const todayString = getTodayString();
         const todayIndex = filteredStories.findIndex(story => story.date === todayString);
@@ -682,7 +678,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
 
           if (allCardsReady && scrollViewRef.current) {
             const targetScrollTop = Math.max(0, totalHeight - 100);
-            
+
             scrollViewRef.current.scrollTo({
               top: targetScrollTop,
               behavior: 'smooth'
@@ -702,7 +698,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
           }
         } else {
           // 没有今天的事件，滚动到最近的未来事件
-          
+
           const today = new Date(todayString);
           let closestFutureIndex = -1;
           let closestFutureDistance = Infinity;
@@ -713,7 +709,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
             if (story.date) {
               const storyDate = new Date(story.date);
               const distance = Math.abs(storyDate.getTime() - today.getTime());
-              
+
               if (storyDate >= today) {
                 // 未来的事件
                 if (distance < closestFutureDistance) {
@@ -753,7 +749,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
 
             if (allCardsReady && scrollViewRef.current) {
               const targetScrollTop = Math.max(0, totalHeight - 100);
-              
+
               scrollViewRef.current.scrollTo({
                 top: targetScrollTop,
                 behavior: 'smooth'
@@ -805,10 +801,10 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
   const calculateSameDayStates = (stories: StoryWithDistance[]) => {
     const sameDayStates = new Array(stories.length).fill(false);
     const sameDayPositions = new Array(stories.length).fill(0);
-    
+
     // 按日期分组，模拟排序逻辑
     const dateGroups = new Map<string, { stories: typeof stories, indices: number[] }>();
-    
+
     // 先处理有日期的故事
     for (let i = 0; i < stories.length; i++) {
       const story = stories[i];
@@ -820,16 +816,16 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
         dateGroups.get(story.date)!.indices.push(i);
       }
     }
-    
+
     // 无日期的故事不归入任何日期组，保持独立
-    
+
     // 对于每个日期组，如果有多于一个故事（包括无日期的），标记同一天并设置位置
     for (const [date, group] of dateGroups.entries()) {
       if (group.stories.length >= 2) { // 改为检查总故事数，包括无日期的
         // 找到第一个和最后一个故事的索引
         const firstIndex = Math.min(...group.indices);
         const lastIndex = Math.max(...group.indices);
-        
+
         // 计算每个故事在同一天组中的位置
         let position = 0;
         for (let i = firstIndex; i <= lastIndex; i++) {
@@ -841,7 +837,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
         }
       }
     }
-    
+
     return { sameDayStates, sameDayPositions };
   };
 
@@ -858,10 +854,10 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
       }
       cardRefs.current = newCardRefs;
     }
-    
+
     // 计算所有故事的同一天状态和位置
     const { sameDayStates, sameDayPositions } = calculateSameDayStates(stories);
-    
+
     filteredStories.forEach((story: StoryWithDistance, filteredIndex: number) => {
       // 找到当前story在原始stories中的索引
       const originalIndex = stories.findIndex(s => 
@@ -872,15 +868,15 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
         s.end_time === story.end_time &&
         s.address?.name === story.address?.name
       );
-      
+
       // 如果找不到原始索引，跳过（理论上不应该发生）
       if (originalIndex === -1) return;
-      
+
       const storyIndex = originalIndex; // 使用原始索引
       // 使用预计算的同一天状态和位置
       const isSameDay = sameDayStates[originalIndex];
       const sameDayPosition = sameDayPositions[originalIndex];
-      
+
       // 插入横向点分隔
       const hasSeparator = filteredIndex > 0 && story.distanceFromPrevious > 0;
 
@@ -937,14 +933,14 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
         </div>
       );
     });
-    
+
     return elements;
   };
 
   return (
     <div className='story-list-container' ref={containerRef}>
       {/* 拖拽排序无需蒙版 */}
-      
+
       <div
         className='story-list'
         onScroll={handleScroll}
@@ -961,7 +957,7 @@ export default function StoryList({ stories, onStoriesChange, settings, updateSe
           </button>
         </div>
       </div>
-      
+
       <DateNavigation 
         stories={stories}
         currentDate={currentDate}

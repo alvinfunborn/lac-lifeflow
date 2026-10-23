@@ -36,11 +36,11 @@ export class LifeFlowRepository {
         if (!file || !(file instanceof TFile)) return false;
         try {
             const content = await this.app.vault.read(file);
-            
+
             // 只解析TOML头部部分，忽略wikilinks
             const lines = content.split('\n');
             const tomlLines: string[] = [];
-            
+
             for (const line of lines) {
                 const trimmed = line.trim();
                 // 遇到空行或wikilinks时停止
@@ -49,7 +49,7 @@ export class LifeFlowRepository {
                 }
                 tomlLines.push(line);
             }
-            
+
             const tomlHeader = tomlLines.join('\n');
             const parsed = this.parseToml(tomlHeader) || {};
             const typeVal = String((parsed as Record<string, unknown>)['type'] ?? '').toLowerCase();
@@ -65,21 +65,21 @@ export class LifeFlowRepository {
     // 加载所有故事
     async loadAll(): Promise<Story[]> {
         const rootFile = this.app.vault.getAbstractFileByPath(this.rootFilePath);
-        
+
         if (!rootFile || !(rootFile instanceof TFile)) {
             return [];
         }
 
         try {
             const content = await this.app.vault.read(rootFile);
-            
+
             const matches = content.match(/\[\[[^\]]+\]\]/g) || [];
-            
+
             const linkTargets = matches
                 .map((m: string) => m.replace(/^\[\[|\]\]$/g, ''))
                 .map((s: string) => s.split('|')[0]?.trim())
                 .filter(Boolean) as string[];
-            
+
             const stories: Story[] = [];
             for (const target of linkTargets) {
                 let file: TFile | null = null;
@@ -96,10 +96,10 @@ export class LifeFlowRepository {
                 try {
                     const fileContent = await this.app.vault.read(file);
                     const data = this.parseToml(this.quoteWikilinksForToml(fileContent));
-                    
+
                     // 文件名就是ID
                     const storyId = extractIdFromFilename(file.basename);
-                    
+
                     const story: Story = {
                         id: storyId,
                         name: data.name || target,
@@ -110,7 +110,7 @@ export class LifeFlowRepository {
                     };
                     stories.push(story);
                 } catch (e) {
-                    console.log('❌ [loadAll] Failed to parse file:', file.path, e);
+
                     // 跳过解析失败的文件
                 }
             }
@@ -124,7 +124,7 @@ export class LifeFlowRepository {
     // 保存故事（使用ID作为文件名，避免重复创建）
     async saveStory(story: Story): Promise<void> {
         const storiesFolder = this.getStoriesFolder();
-        
+
         // 确保文件夹存在
         const folder = this.app.vault.getAbstractFileByPath(storiesFolder);
         if (!folder) {
@@ -135,17 +135,17 @@ export class LifeFlowRepository {
         const storyId = story.id || story.name || 'unnamed-story';
         const originalFileName = `${storyId}.md`;
         const originalFilePath = `${storiesFolder}/${originalFileName}`;
-        
+
         let fileName = originalFileName;
         let filePath = originalFilePath;
         let targetFile: TFile | null = null;
-        
+
         // 检查文件是否已存在（在整个vault中搜索）
         const allFiles = this.app.vault.getMarkdownFiles();
-        
+
         // 查找现有文件：优先使用ID，其次使用文件中的name
         const existingFile = allFiles.find((file: TFile) => file.basename === storyId);
-        
+
         if (existingFile) {
             // 文件已存在，检查是否可以被toml解析
             let canParse = false;
@@ -155,10 +155,10 @@ export class LifeFlowRepository {
                 this.parseToml(quotedContent);
                 canParse = true;
             } catch (e) {
-                console.log('⚠️ [saveStory] 文件存在但无法解析为TOML:', existingFile.path);
+
                 canParse = false;
             }
-            
+
             if (canParse) {
                 // 可以解析，使用现有文件
                 targetFile = existingFile;
@@ -168,7 +168,7 @@ export class LifeFlowRepository {
                 // 无法解析，尝试用encodeName查找
                 const encodedName = encodeURIComponent(storyId);
                 const encodedFile = allFiles.find((file: TFile) => file.basename === encodedName);
-                
+
                 if (encodedFile) {
                     // 检查encodedFile是否可以被toml解析
                     let encodedCanParse = false;
@@ -178,10 +178,10 @@ export class LifeFlowRepository {
                         this.parseToml(quotedContent);
                         encodedCanParse = true;
                     } catch (e) {
-                        console.log('⚠️ [saveStory] encodedName文件存在但无法解析为TOML:', encodedFile.path);
+
                         encodedCanParse = false;
                     }
-                    
+
                     if (encodedCanParse) {
                         // 可以解析，使用encodedFile
                         targetFile = encodedFile;
@@ -193,7 +193,7 @@ export class LifeFlowRepository {
                         const timestampedName = `${storyId}-${timestamp}`;
                         const timestampedFileName = `${timestampedName}.md`;
                         const timestampedFilePath = `${storiesFolder}/${timestampedFileName}`;
-                        
+
                         const initialContent = this.dequoteWikilinks(this.storyToTomlString(story));
                         await this.app.vault.create(timestampedFilePath, initialContent);
                         targetFile = this.app.vault.getAbstractFileByPath(timestampedFilePath) as TFile;
@@ -206,7 +206,7 @@ export class LifeFlowRepository {
                     const timestampedName = `${storyId}-${timestamp}`;
                     const timestampedFileName = `${timestampedName}.md`;
                     const timestampedFilePath = `${storiesFolder}/${timestampedFileName}`;
-                    
+
                     const initialContent = this.dequoteWikilinks(this.storyToTomlString(story));
                     await this.app.vault.create(timestampedFilePath, initialContent);
                     targetFile = this.app.vault.getAbstractFileByPath(timestampedFilePath) as TFile;
@@ -225,7 +225,7 @@ export class LifeFlowRepository {
                 const encodedName = encodeURIComponent(storyId);
                 const encodedFileName = `${encodedName}.md`;
                 const encodedFilePath = `${storiesFolder}/${encodedFileName}`;
-                
+
                 const initialContent = this.dequoteWikilinks(this.storyToTomlString(story));
                 await this.app.vault.create(encodedFilePath, initialContent);
                 targetFile = this.app.vault.getAbstractFileByPath(encodedFilePath) as TFile;
@@ -233,16 +233,16 @@ export class LifeFlowRepository {
                 filePath = encodedFilePath;
             }
         }
-        
+
         // 2. 设置story的ID为文件名（存储用）
         story.id = targetFile?.basename || fileName.replace('.md', '');
         // 5. 如果目标文件存在，更新内容
         if (targetFile) {
             try {
                 const existing = await this.app.vault.read(targetFile);
-                
+
                 const rewritten = this.rewriteTomlWithCommentsTop(existing, story);
-                
+
                 await this.app.vault.modify(targetFile, this.dequoteWikilinks(rewritten));
             } catch (e) {
                 console.error('❌ [saveStory] 更新文件失败:', e);
@@ -264,8 +264,8 @@ export class LifeFlowRepository {
 
     // 更新根文件 - 根据故事列表顺序重写整个文件
     async updateRootFile(stories: Story[]): Promise<void> {
-        console.log('🔍 [updateRootFile] Called with stories:', stories.map(s => s.id));
-        
+
+
         const rootPath = this.rootFilePath;
         let rootContent = '';
 
@@ -282,7 +282,7 @@ export class LifeFlowRepository {
         // 1. 读取文件，将所有 [[xxx]] 转换为 [["xxx"]] 以便 TOML 解析
         //    每个 [[xxx]] 都会被 TOML 解析为表数组
         const tomlCompatibleContent = rootContent.replace(/\[\[([^\]]+)\]\]/g, '[[\"$1\"]]');
-        
+
         // 2. 解析整个文件为 TOML
         let parsed: any = {};
         try {
@@ -297,14 +297,14 @@ export class LifeFlowRepository {
         const storyIds = new Set(stories.map(s => s.id).filter(Boolean));
         const allFiles = this.app.vault.getMarkdownFiles();
         const allStoryIds = new Set(allFiles.map(f => f.basename));
-        
+
         // 删除所有故事相关的表数组
         for (const key of Object.keys(parsed)) {
             if (allStoryIds.has(key)) {
                 delete parsed[key];
             }
         }
-        
+
         // 添加新的故事表数组（按顺序）
         // 注意：需要添加至少一个对象，否则会被序列化为空数组而不是表数组
         for (const story of stories) {
@@ -315,10 +315,10 @@ export class LifeFlowRepository {
 
         // 4. 转换回 TOML 字符串（保留所有字段）
         const tomlString = TOMLStringify.toToml(parsed);
-        
+
         // 5. 将所有 [["xxx"]] 转换回 [[xxx]]，并移除空对象
         let finalContent = tomlString.replace(/\[\["([^"]+)"\]\]/g, '[[$1]]');
-        
+
         // 6. 清理空对象（表数组中的空内容）
         //    将 [[xxx]]\n\n 或 [[xxx]]\n[xxx.xxx]\n 等模式简化为 [[xxx]]\n
         finalContent = finalContent.replace(/(\[\[[^\]]+\]\])\s*\n\s*\n/g, '$1\n');
@@ -326,10 +326,10 @@ export class LifeFlowRepository {
         const existingRoot = this.app.vault.getAbstractFileByPath(rootPath);
         if (existingRoot && existingRoot instanceof TFile) {
             await this.app.vault.modify(existingRoot, finalContent);
-            console.log('✅ [updateRootFile] Root file updated');
+
         } else {
             await this.app.vault.create(rootPath, finalContent);
-            console.log('✅ [updateRootFile] Root file created');
+
         }
     }
 
@@ -345,7 +345,9 @@ export class LifeFlowRepository {
             return TOML.parse(normalizedContent);
         } catch (error) {
             console.error('TOML parsing error:', error);
-            return {};
+            // A failed parse must not look like an empty, valid document:
+            // saveStory uses this result to decide whether a file can be rewritten.
+            throw error;
         }
     }
 
@@ -358,10 +360,10 @@ export class LifeFlowRepository {
             if (t.startsWith('#')) commentLines.push(raw);
             else otherLines.push(raw);
         }
-        
+
         // 检查原有地址格式（内联对象 vs 块对象）
         const hasInlineAddress = this.detectInlineAddressFormat(otherLines.join('\n'));
-        
+
         // 使用已有轻量 parser 读取为对象
         const parsed = this.parseToml(this.quoteWikilinksForToml(otherLines.join('\n'))) || {};
 
@@ -371,12 +373,12 @@ export class LifeFlowRepository {
         parsed['detail']['start_time'] = story.start_time || '';
         parsed['detail']['end_time'] = story.end_time || '';
         parsed['detail']['description'] = story.description || '';
-        
+
         // 智能处理地址字段合并和格式保持
         if (story.address) {
             const existingAddress = parsed['detail']?.['address'];
             const mergedAddress = this.mergeAddressFields(existingAddress, story.address);
-            
+
             if (hasInlineAddress && this.canKeepInlineFormat(mergedAddress)) {
                 // 保持内联对象格式
                 parsed['detail']['address'] = mergedAddress;
@@ -414,35 +416,35 @@ export class LifeFlowRepository {
 
     // 合并现有地址字段和新的life-flow地址字段
     private mergeAddressFields(existingAddress: any, newAddress: any): any {
-        console.log('🔍 [mergeAddressFields] Existing address:', existingAddress);
-        console.log('🔍 [mergeAddressFields] New address:', newAddress);
-        
+
+
+
         const merged = { ...existingAddress }; // 先复制现有地址的所有字段
-        
+
         // 添加或更新life-flow相关字段
         const lifeFlowFields = ['name', 'address', 'longitude', 'latitude', 'coordinate_system'];
         lifeFlowFields.forEach(field => {
             if (newAddress[field] !== undefined && newAddress[field] !== null && newAddress[field] !== '') {
                 merged[field] = newAddress[field];
-                console.log(`🔍 [mergeAddressFields] Added/updated field ${field}:`, newAddress[field]);
+
             } else {
                 // 如果新值为undefined、null或空字符串，删除该字段
                 delete merged[field];
-                console.log(`🔍 [mergeAddressFields] Deleted field ${field} (undefined/null/empty value)`);
+
             }
         });
-        
-        console.log('🔍 [mergeAddressFields] Final merged address:', merged);
+
+
         return merged;
     }
 
     // 判断合并后的地址是否可以保持内联格式
     private canKeepInlineFormat(address: any): boolean {
         if (!address) return false;
-        
+
         const lifeFlowFields = ['name', 'address', 'longitude', 'latitude'];
         const nonLifeFlowFields = Object.keys(address).filter(k => !lifeFlowFields.includes(k));
-        
+
         // 只有非life-flow字段不超过2个，且没有复杂的life-flow字段时才能保持内联
         return nonLifeFlowFields.length <= 2 && 
                (!address.hasOwnProperty('address') || address.address === '') &&
@@ -454,13 +456,13 @@ export class LifeFlowRepository {
     private filterLifeFlowAddressFields(address: any): any {
         const lifeFlowFields = ['name', 'address', 'longitude', 'latitude'];
         const filtered: any = {};
-        
+
         Object.keys(address).forEach(key => {
             if (!lifeFlowFields.includes(key)) {
                 filtered[key] = address[key];
             }
         });
-        
+
         return filtered;
     }
 
@@ -470,7 +472,7 @@ export class LifeFlowRepository {
     private quoteWikilinksForToml(content: string): string {
         // 先处理换行符问题
         const normalizedContent = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        
+
         return normalizedContent.replace(/\[\[[^\]]+\]\]/g, (match: string, offset: number, full: string) => {
             const before = offset > 0 ? full[offset - 1] : '';
             const after = offset + match.length < full.length ? full[offset + match.length] : '';
@@ -488,8 +490,8 @@ export class LifeFlowRepository {
 
     // 将 Story 转换为 TOML 字符串
     private storyToTomlString(story: Story): string {
-        console.log('🔍 [storyToTomlString] Input story:', story);
-        
+
+
         const storyObj = {
             name: story.name || 'Untitled Story',
             detail: {
@@ -499,7 +501,7 @@ export class LifeFlowRepository {
                 ...(story.address && {
                     address: (() => {
                         const addr: any = {};
-                        
+
                         // 只有当字段有值时才添加
                         if (story.address!.name) {
                             addr.name = story.address!.name;
@@ -516,18 +518,18 @@ export class LifeFlowRepository {
                         if (story.address!.coordinate_system) {
                             addr.coordinate_system = story.address!.coordinate_system;
                         }
-                        
-                        console.log('🔍 [storyToTomlString] Address object:', addr);
+
+
                         return addr;
                     })()
                 })
             }
         };
-        
-        console.log('🔍 [storyToTomlString] Final story object:', storyObj);
+
+
         const tomlString = TOMLStringify.toToml(storyObj);
-        console.log('🔍 [storyToTomlString] Generated TOML:', tomlString);
-        
+
+
         return tomlString;
     }
 

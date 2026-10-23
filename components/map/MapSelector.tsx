@@ -58,8 +58,8 @@ export default function MapSelector({
         const availableProviders: string[] = [];
         if (settings.gaodeWebServiceKey) availableProviders.push('gaode');
         if (settings.googleMapsApiKey) availableProviders.push('google');
-        
-        console.log('MapSelector: Available providers:', availableProviders);
+
+
 
         // 创建地图提供商实例（传递当前语言）
         const currentLang = getCurrentLocale();
@@ -69,13 +69,13 @@ export default function MapSelector({
         // 初始化地图
         if (mapContainerRef.current) {
           await provider.initMap(mapContainerRef.current, initialLocation, availableProviders);
-          
+
           // 绑定地图点击事件
           provider.onMapClick(handleMapClick);
 
           setMapLoaded(true);
         }
-        
+
         // 设置当前提供商状态
         setCurrentProvider(settings.mapApiProvider);
       } catch (error) {
@@ -100,22 +100,22 @@ export default function MapSelector({
   useEffect(() => {
     const handleProviderSwitch = async (event: CustomEvent) => {
       const { provider: newProvider } = event.detail;
-      
-      console.log('MapSelector: Received switch event:', newProvider, 'current:', currentProvider);
-      
+
+
+
       if (newProvider === currentProvider) {
-        console.log('MapSelector: Same provider, skipping switch');
+
         return; // 已经是当前提供商，无需切换
       }
 
       try {
-        console.log('🔄 MapSelector: Starting provider switch...');
-        console.log('  userSelectedNewLocation (state):', userSelectedNewLocation);
-        console.log('  userSelectedNewLocation (ref):', userSelectedNewLocationRef.current);
-        console.log('  selectedLocation (state):', selectedLocation);
-        console.log('  selectedLocation (ref):', selectedLocationRef.current);
-        console.log('  initialLocation:', initialLocation);
-        
+
+
+
+
+
+
+
         // 清除搜索结果和搜索标记
         setSearchResults([]);
         setSearchError('');
@@ -123,7 +123,7 @@ export default function MapSelector({
           providerRef.current.clearMarkers(searchMarkersRef.current);
           searchMarkersRef.current = [];
         }
-        
+
         // 销毁当前地图
         if (providerRef.current) {
           providerRef.current.destroy();
@@ -152,7 +152,7 @@ export default function MapSelector({
         if (settings.gaodeWebServiceKey) availableProviders.push('gaode');
         if (settings.googleMapsApiKey) availableProviders.push('google');
 
-        console.log('MapSelector: Switching to provider:', newProvider, 'available:', availableProviders);
+
 
         // 创建地图提供商实例（传递当前语言）
         const currentLang = getCurrentLocale();
@@ -166,21 +166,21 @@ export default function MapSelector({
           const locationToUse = userSelectedNewLocationRef.current 
             ? (selectedLocationRef.current || undefined) 
             : initialLocation;
-          console.log('📍 MapSelector: Location to use:', locationToUse);
-          console.log('  Reason:', userSelectedNewLocationRef.current ? 'User selected new location' : 'Using initial location');
-          
+
+
+
           await provider.initMap(mapContainerRef.current, locationToUse, availableProviders);
           provider.onMapClick(handleMapClick);
-          
+
           // 如果有位置，重新添加标记
           if (locationToUse && locationToUse.longitude && locationToUse.latitude) {
             const [lng, lat] = await provider.convertCoordinates(locationToUse);
             currentMarkerRef.current = provider.addMarker(lng, lat, locationToUse.name);
           }
-          
+
           setMapLoaded(true);
         }
-        
+
         // 更新当前提供商状态
         setCurrentProvider(newProvider);
       } catch (error) {
@@ -200,16 +200,16 @@ export default function MapSelector({
     if (!providerRef.current) return;
 
     try {
-      console.log('🖱️ MapSelector: Map clicked at:', lng, lat);
-      
+
+
       // 使用逆地理编码获取地址信息
       const location = await providerRef.current.getAddressByCoordinates(lng, lat);
-      
+
       if (location) {
         setSelectedLocation(location);
         selectedLocationRef.current = location;  // 同步更新 ref
         setSearchQuery(location.name || t('map.selectedLocation'));
-        console.log('  ✅ Location set:', location);
+
       } else {
         const defaultLocation: MapLocation = {
           longitude: lng,
@@ -219,14 +219,14 @@ export default function MapSelector({
         setSelectedLocation(defaultLocation);
         selectedLocationRef.current = defaultLocation;  // 同步更新 ref
         setSearchQuery(t('map.selectedLocation'));
-        console.log('  ✅ Default location set:', defaultLocation);
+
       }
-      
+
       // 标记用户已选择新地点
       setUserSelectedNewLocation(true);
       userSelectedNewLocationRef.current = true;  // 同步更新 ref
-      console.log('  ✅ userSelectedNewLocation set to true');
-      
+
+
       setSearchResults([]);
 
       // 更新标记
@@ -245,19 +245,19 @@ export default function MapSelector({
 
     setIsSearching(true);
     setSearchError('');
-    
+
     try {
       const results = await providerRef.current.searchPlaces(searchQuery);
-      
+
       if (results && results.length > 0) {
         setSearchResults(results);
-        
+
         // 清除之前的搜索结果标记
         if (searchMarkersRef.current.length > 0) {
           providerRef.current.clearMarkers(searchMarkersRef.current);
           searchMarkersRef.current = [];
         }
-        
+
         // 显示搜索结果标记
         searchMarkersRef.current = providerRef.current.displaySearchMarkers(
           results,
@@ -266,7 +266,7 @@ export default function MapSelector({
       } else {
         setSearchResults([]);
         setSearchError(t('map.noResults'));
-        
+
         // 清除搜索结果标记
         if (searchMarkersRef.current.length > 0 && providerRef.current) {
           providerRef.current.clearMarkers(searchMarkersRef.current);
@@ -291,7 +291,7 @@ export default function MapSelector({
           behavior: 'smooth',
           block: 'center'
         });
-        
+
         // 添加高亮效果
         resultItems.forEach((item, i) => {
           const numberElement = item.querySelector('.lf-map-search-result-number');
@@ -313,29 +313,29 @@ export default function MapSelector({
   const handleSelectResult = async (result: MapSearchResult) => {
     if (!providerRef.current) return;
 
-    console.log('🔍 MapSelector: Search result selected:', result);
-    
+
+
     setSelectedLocation(result.location);
     selectedLocationRef.current = result.location;  // 同步更新 ref
     setSearchQuery(result.name);
     setSearchResults([]);
-    
+
     // 标记用户已选择新地点
     setUserSelectedNewLocation(true);
     userSelectedNewLocationRef.current = true;  // 同步更新 ref
-    console.log('  ✅ userSelectedNewLocation set to true');
-    
+
+
     // 清除搜索结果标记
     if (searchMarkersRef.current.length > 0) {
       providerRef.current.clearMarkers(searchMarkersRef.current);
       searchMarkersRef.current = [];
     }
-    
+
     // 移动地图到选中位置并添加标记
     if (result.location.longitude && result.location.latitude) {
       const [lng, lat] = await providerRef.current.convertCoordinates(result.location);
       providerRef.current.setCenter(lng, lat, 15);
-      
+
       // 更新选中标记
       if (currentMarkerRef.current) {
         providerRef.current.removeMarker(currentMarkerRef.current);
@@ -387,14 +387,14 @@ export default function MapSelector({
     setSearchResults([]);
     setSearchQuery('');
     setSelectedLocation(null);
-    
+
     // 清除地图上的标记
     if (providerRef.current) {
       if (searchMarkersRef.current.length > 0) {
         providerRef.current.clearMarkers(searchMarkersRef.current);
         searchMarkersRef.current = [];
       }
-      
+
       if (currentMarkerRef.current) {
         providerRef.current.removeMarker(currentMarkerRef.current);
         currentMarkerRef.current = null;
@@ -414,7 +414,7 @@ export default function MapSelector({
   return (
     <div className="lf-map-selector-mask" onClick={(e) => { if (e.currentTarget === e.target) onCancel(); }}>
       <div className="lf-map-selector" onClick={(e) => e.stopPropagation()}>
-        
+
         {/* 地图层作为背景 */}
         <div className="lf-map-background">
           <div 

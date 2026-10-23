@@ -41,11 +41,7 @@ export default function StoryEditModal({
 
   useEffect(() => {
     if (story) {
-      console.log('🔍 [StoryEditModal] Story received:', {
-        id: story.id,
-        name: story.name,
-        hasId: !!story.id
-      });
+
       setFormData({
         id: story.id,
         name: story.name || '',
@@ -68,7 +64,7 @@ export default function StoryEditModal({
         ...prev,
         [field]: value
       }));
-      
+
       // 验证时间格式
       if (field === 'start_time' || field === 'end_time') {
         if (value && !validateTimeFormat(value)) {
@@ -128,11 +124,11 @@ export default function StoryEditModal({
   };
 
   const handleMapLocationSelect = (location: MapLocation) => {
-    console.log('🔍 [handleMapLocationSelect] Received location:', location);
-    
+
+
     // 如果名称为空，清除整个地址对象
     if (!location.name || location.name.trim() === '') {
-      console.log('🔍 [handleMapLocationSelect] Clearing address (empty name)');
+
       setFormData((prev: Partial<StoryWithDistance>) => ({
         ...prev,
         address: undefined
@@ -142,7 +138,7 @@ export default function StoryEditModal({
       const address: any = {
         name: location.name
       };
-      
+
       // 只有当字段有值时才添加到地址对象中
       if (location.address !== undefined) {
         address.address = location.address;
@@ -156,9 +152,9 @@ export default function StoryEditModal({
       if (location.coordinate_system !== undefined) {
         address.coordinate_system = location.coordinate_system;
       }
-      
-      console.log('🔍 [handleMapLocationSelect] Setting address:', address);
-      
+
+
+
       setFormData((prev: Partial<StoryWithDistance>) => ({
         ...prev,
         address: address
@@ -171,23 +167,23 @@ export default function StoryEditModal({
     if (!story) {
       return;
     }
-    
+
     if (!validate()) {
       return;
     }
-    
+
     const updatedStory: StoryWithDistance = {
       ...story,
       ...formData
     } as StoryWithDistance;
-    
+
     onSave(updatedStory);
   };
 
   const handleNext = () => {
     if (!story) return;
     if (!validate()) return;
-    
+
     const updatedStory: StoryWithDistance = {
       ...story,
       ...formData
@@ -212,28 +208,28 @@ export default function StoryEditModal({
       return false;
     }
     setNameError('');
-    
+
     // 验证时间格式
     const startTime = formData.start_time || '';
     const endTime = formData.end_time || '';
-    
+
     if (startTime && !validateTimeFormat(startTime)) {
       setTimeError(t('form.error.startTimeInvalid'));
       return false;
     }
-    
+
     if (endTime && !validateTimeFormat(endTime)) {
       setTimeError(t('form.error.endTimeInvalid'));
       return false;
     }
-    
+
     // 验证时间范围
     const timeRangeValidation = validateTimeRange(startTime, endTime);
     if (!timeRangeValidation.valid) {
       setTimeError(timeRangeValidation.error || t('form.error.timeRangeInvalid'));
       return false;
     }
-    
+
     setTimeError('');
     return true;
   };

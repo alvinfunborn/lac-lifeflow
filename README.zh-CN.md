@@ -161,3 +161,7 @@ coordinate_system = "GCJ-02"
 
 MIT License
 
+
+## 隐私与网络使用
+
+地图为可选功能，提供商选择 None 时不请求地图服务。启用 Google Maps 或高德地图后，会加载所选提供商的远程 JavaScript SDK 和地图瓦片，并向其发送地点搜索词、坐标，用于搜索、地理编码。需要自行申请提供商账户和 API Key，服务可能产生费用。笔记保存在 Vault，地图查询由所选提供商处理。API Key 保存于本地插件设置 data.json，请勿提交或分享该文件。本插件不收集分析遥测。

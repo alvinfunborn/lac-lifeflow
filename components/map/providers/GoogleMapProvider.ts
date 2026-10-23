@@ -31,17 +31,17 @@ export class GoogleMapProvider implements IMapProvider {
   async initMap(container: HTMLElement, initialLocation?: MapLocation, availableProviders?: string[]): Promise<void> {
     await loadGoogleMapsAPI(this.apiKey, this.language);
     const config = createGoogleMapConfig(this.apiKey);
-    
+
     // 保存容器引用
     this.containerElement = container;
-    
+
     // 为谷歌地图容器添加事件阻止，防止触发 Obsidian 手势
     const stopPropagation = (e: Event) => e.stopPropagation();
     const addListener = (type: string, handler: EventListener, options?: any) => {
       container.addEventListener(type, handler, options);
       this.eventListeners.push({ type, handler, options });
     };
-    
+
     addListener('touchstart', stopPropagation, { passive: false });
     addListener('touchmove', stopPropagation, { passive: false });
     addListener('touchend', stopPropagation, { passive: false });
@@ -49,7 +49,7 @@ export class GoogleMapProvider implements IMapProvider {
     addListener('mousemove', stopPropagation);
     addListener('mouseup', stopPropagation);
     addListener('wheel', stopPropagation, { passive: false });
-    
+
     this.mapInstance = new google.maps.Map(container, {
       center: config.center,
       zoom: config.zoom,
@@ -96,7 +96,7 @@ export class GoogleMapProvider implements IMapProvider {
 
   addMarker(lng: number, lat: number, title?: string): any {
     if (!this.mapInstance) return null;
-    
+
     // 优先使用 AdvancedMarkerElement (需要 marker 库和 mapId)
     if (google.maps.marker && google.maps.marker.AdvancedMarkerElement) {
       const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -106,14 +106,14 @@ export class GoogleMapProvider implements IMapProvider {
       });
       return marker;
     }
-    
+
     // 回退到经典 Marker
     const marker = new google.maps.Marker({
       position: { lat, lng },
       map: this.mapInstance,
       title: title || t('map.selectedLocation')
     });
-    
+
     return marker;
   }
 
@@ -140,21 +140,21 @@ export class GoogleMapProvider implements IMapProvider {
       const result = results[i];
       if (result.location.longitude && result.location.latitude) {
         let marker: any;
-        
+
         // 优先使用 AdvancedMarkerElement
         if (google.maps.marker && google.maps.marker.AdvancedMarkerElement) {
           // 创建数字标签元素
           const labelDiv = document.createElement('div');
           labelDiv.className = 'lf-map-marker-number';
           labelDiv.textContent = String(i + 1);
-          
+
           marker = new google.maps.marker.AdvancedMarkerElement({
             position: { lat: result.location.latitude, lng: result.location.longitude },
             map: this.mapInstance,
             title: result.name,
             content: labelDiv
           });
-          
+
           marker.addListener('click', () => onClick(i));
         } else {
           // 回退到经典 Marker
@@ -169,7 +169,7 @@ export class GoogleMapProvider implements IMapProvider {
               fontWeight: 'bold'
             }
           });
-          
+
           marker.addListener('click', () => onClick(i));
         }
 
@@ -198,7 +198,7 @@ export class GoogleMapProvider implements IMapProvider {
 
   onMapClick(handler: (lng: number, lat: number) => void): void {
     if (!this.mapInstance) return;
-    
+
     this.mapInstance.addListener('click', (e: any) => {
       if (e.latLng) {
         const lat = e.latLng.lat();
@@ -214,7 +214,7 @@ export class GoogleMapProvider implements IMapProvider {
     }
 
     const coordSystem = location.coordinate_system || 'WGS84';
-    
+
     // 如果已经是WGS84，直接返回
     if (coordSystem.toLowerCase() === 'wgs84' || coordSystem.toLowerCase() === 'gps') {
       return [location.longitude, location.latitude];
@@ -248,15 +248,15 @@ export class GoogleMapProvider implements IMapProvider {
     // 创建控件容器
     const controlDiv = document.createElement('div');
     controlDiv.className = 'lf-custom-map-type-control';
-    controlDiv.innerHTML = t('map.satellite'); // 初始显示"卫星"，因为当前是地图图层
-    
+    controlDiv.textContent = t('map.satellite'); // 初始显示"卫星"，因为当前是地图图层
+
     // 添加点击事件
     controlDiv.addEventListener('click', () => {
       const currentMapType = this.mapInstance!.getMapTypeId();
       const newMapType = currentMapType === 'roadmap' ? 'satellite' : 'roadmap';
       this.mapInstance!.setMapTypeId(newMapType);
       // 按钮显示的是点击后将要切换到的图层类型
-      controlDiv.innerHTML = newMapType === 'roadmap' ? t('map.satellite') : t('map.roadmap');
+      controlDiv.textContent = newMapType === 'roadmap' ? t('map.satellite') : t('map.roadmap');
     });
 
     // 将控件添加到地图的 RIGHT_BOTTOM 位置（右侧靠下），并向上偏移
@@ -273,11 +273,11 @@ export class GoogleMapProvider implements IMapProvider {
     // 创建控件容器
     const controlDiv = document.createElement('div');
     controlDiv.className = 'lf-provider-switcher-control';
-    
+
     // 创建下拉选择框
     const select = document.createElement('select');
     select.className = 'lf-provider-select';
-    
+
     // 添加选项
     availableProviders.forEach(provider => {
       const option = document.createElement('option');
@@ -286,23 +286,23 @@ export class GoogleMapProvider implements IMapProvider {
       option.selected = provider === 'google'; // 当前是 Google Maps
       select.appendChild(option);
     });
-    
+
     // 添加切换事件
     select.addEventListener('change', (event) => {
       const target = event.target as HTMLSelectElement;
       const selectedProvider = target.value;
-      
-      console.log('Google Maps: Switching to provider:', selectedProvider);
-      
+
+
+
       // 触发自定义事件，通知 MapSelector 切换提供商
       const switchEvent = new CustomEvent('mapProviderSwitch', {
         detail: { provider: selectedProvider }
       });
       window.dispatchEvent(switchEvent);
     });
-    
+
     controlDiv.appendChild(select);
-    
+
     // 将控件添加到地图的 TOP_CENTER 位置（顶部居中）
     this.mapInstance.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
   }
@@ -316,7 +316,7 @@ export class GoogleMapProvider implements IMapProvider {
       this.eventListeners = [];
       this.containerElement = null;
     }
-    
+
     // Google Maps 不需要显式销毁
     this.mapInstance = null;
     this.currentMarker = null;

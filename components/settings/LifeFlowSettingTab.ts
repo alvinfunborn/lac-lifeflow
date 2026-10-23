@@ -19,7 +19,7 @@ export class LifeFlowSettingTab extends PluginSettingTab {
         // —— 格式与用法说明 ——
         containerEl.createEl('p', { text: t('settings.description'), cls: 'setting-item-description' });
         containerEl.createEl('p', { text: t('settings.tomlDescription'), cls: 'setting-item-description' });
-        
+
         // TOML格式示例
         const tomlExample = `name = "Practice Coding"
 
@@ -35,10 +35,10 @@ address = "燕郊镇天洋广场c馆一层小米之家"
 longitude = 116.821768
 latitude = 39.964811
 coordinate_system = "GCJ-02"`;
-        
+
         containerEl.createEl('p', { text: t('settings.tomlExample'), cls: 'setting-item-description' });
         containerEl.createEl('pre', { text: tomlExample, cls: 'setting-item-description' });
-        
+
         // 使用说明
         containerEl.createEl('p', { text: t('settings.usage'), cls: 'setting-item-description' });
         containerEl.createEl('ul', { cls: 'setting-item-description' }, (ul) => {
@@ -83,8 +83,8 @@ coordinate_system = "GCJ-02"`;
                 }));
 
         // 地图设置分组
-        containerEl.createEl('h3', { text: t('settings.map.title') });
-        
+        new Setting(containerEl).setName(t('settings.map.title')).setHeading();
+
         new Setting(containerEl)
             .setName(t('settings.map.provider.name'))
             .setDesc(t('settings.map.provider.desc'))

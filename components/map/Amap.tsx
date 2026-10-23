@@ -47,7 +47,7 @@ export class CoordinateConverter {
 
       if (data.status === '1' && data.locations) {
         const convertedCoord = data.locations.split(',').map(Number);
-        console.log(`Web API coordinate conversion success: ${fromSystem} -> GCJ-02: ${lng}, ${lat} -> ${convertedCoord[0]}, ${convertedCoord[1]}`);
+
         return [convertedCoord[0], convertedCoord[1]];
       } else {
         console.warn(`Web API coordinate conversion failed for ${fromSystem}:`, data);
@@ -90,7 +90,7 @@ export const loadAMapAPI = (apiKey?: string, language?: 'zh' | 'en'): Promise<an
     script.src = `https://webapi.amap.com/maps?v=2.0&key=${securityKey}&lang=${lang}`;
     script.async = true;
     script.crossOrigin = 'anonymous';
-    
+
     script.onload = () => {
       if (window.AMap) {
         // 设置地图图标路径，避免图片加载错误
@@ -103,19 +103,19 @@ export const loadAMapAPI = (apiKey?: string, language?: 'zh' | 'en'): Promise<an
         reject(new Error('AMap API failed to load'));
       }
     };
-    
+
     script.onerror = () => {
       reject(new Error('Failed to load AMap API script'));
     };
-    
+
     document.head.appendChild(script);
   });
 };
 
 // 搜索方案 - 仅使用高德地图API
 export const searchPlacesByWebAPI = async (keyword: string, apiKey: string): Promise<any[]> => {
-  console.log(`Searching for: "${keyword}"`);
-  
+
+
   try {
     const searchParams = new URLSearchParams({
       key: apiKey,
@@ -124,17 +124,17 @@ export const searchPlacesByWebAPI = async (keyword: string, apiKey: string): Pro
       output: 'json',
       extensions: 'all'
     });
-    
+
     const response = await fetch(
       `https://restapi.amap.com/v3/place/text?${searchParams.toString()}`
     );
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
-    
+
     if (data.status === '1' && data.pois && data.pois.length > 0) {
       const results = [];
       for (const poi of data.pois) {
@@ -153,10 +153,10 @@ export const searchPlacesByWebAPI = async (keyword: string, apiKey: string): Pro
           distance: poi.distance
         });
       }
-      console.log(`Found ${results.length} results from AMap for "${keyword}"`);
+
       return results;
     } else {
-      console.log(`No results found for "${keyword}"`);
+
       return [];
     }
   } catch (error) {
@@ -172,11 +172,11 @@ export const getAddressByCoordinates = async (lng: number, lat: number, apiKey: 
       `https://restapi.amap.com/v3/geocode/regeo?key=${apiKey}&location=${lng},${lat}&poitype=&radius=1000&extensions=all&batch=false&roadlevel=0`
     );
     const data = await response.json();
-    
+
     if (data.status === '1' && data.regeocode) {
       const regeocode = data.regeocode;
       const addressComponent = regeocode.addressComponent;
-      
+
       // 构建地址名称（优先使用POI名称，其次使用道路+门牌号）
       let name = '';
       if (regeocode.pois && regeocode.pois.length > 0) {
@@ -189,13 +189,13 @@ export const getAddressByCoordinates = async (lng: number, lat: number, apiKey: 
         // 最后使用区县+街道
         name = `${addressComponent.district || ''}${addressComponent.township || ''}`;
       }
-      
+
       // 构建详细地址
       const address = regeocode.formatted_address || 
         `${addressComponent.province || ''}${addressComponent.city || ''}${addressComponent.district || ''}${addressComponent.township || ''}${addressComponent.neighborhood?.name || ''}`;
-      
-      console.log(`逆地理编码成功: ${lng}, ${lat} -> ${name} (${address})`);
-      
+
+
+
       return {
         longitude: lng,
         latitude: lat,
@@ -204,8 +204,8 @@ export const getAddressByCoordinates = async (lng: number, lat: number, apiKey: 
         coordinate_system: 'GCJ-02'
       };
     }
-    
-    console.log(`逆地理编码失败: ${lng}, ${lat}`);
+
+
     return null;
   } catch (error) {
     console.error('逆地理编码失败:', error);
@@ -221,10 +221,10 @@ export const getLocationByIP = async (apiKey: string): Promise<MapLocation | nul
       `https://restapi.amap.com/v3/ip?key=${apiKey}`
     );
     const data = await response.json();
-    
+
     if (data.status === '1' && data.location) {
       const [longitude, latitude] = data.location.split(',').map(Number);
-      
+
       return {
         longitude,
         latitude,
@@ -232,7 +232,7 @@ export const getLocationByIP = async (apiKey: string): Promise<MapLocation | nul
         address: `${data.province}${data.city}${data.district || ''}`
       };
     }
-    
+
     return null;
   } catch (error) {
     console.error('IP定位失败:', error);
@@ -243,14 +243,14 @@ export const getLocationByIP = async (apiKey: string): Promise<MapLocation | nul
 // 获取当前位置（通过IP定位）
 export const getCurrentLocationByIP = async (apiKey: string): Promise<MapLocation | null> => {
   try {
-    console.log('开始IP定位...');
+
     const location = await getLocationByIP(apiKey);
-    
+
     if (location) {
-      console.log('IP定位成功:', location);
+
       return location;
     } else {
-      console.log('IP定位失败，返回默认位置（北京）');
+
       return {
         longitude: 116.4074,
         latitude: 39.9042,

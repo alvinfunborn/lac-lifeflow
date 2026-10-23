@@ -30,7 +30,7 @@ export class AmapProvider implements IMapProvider {
     this.availableProviders = availableProviders; // 保存可用的地图提供商
     const AMap = await loadAMapAPI(this.apiKey, this.language);
     const config = createAmapConfig(this.apiKey);
-    
+
     this.mapInstance = new AMap.Map(container, {
       viewMode: '2D',
       zoom: config.zoom,
@@ -84,10 +84,10 @@ export class AmapProvider implements IMapProvider {
 
   addMarker(lng: number, lat: number, title?: string): any {
     if (!this.mapInstance) return null;
-    
+
     // 保存当前标记位置
     this.currentMarkerPosition = { lng, lat, title };
-    
+
     const AMap = window.AMap;
     const marker = new AMap.Marker({
       position: [lng, lat],
@@ -95,7 +95,7 @@ export class AmapProvider implements IMapProvider {
       content: '<div class="lf-map-marker">📍</div>',
       anchor: 'bottom-center'
     });
-    
+
     this.mapInstance.add(marker);
     this.currentMarker = marker;
     return marker;
@@ -104,7 +104,7 @@ export class AmapProvider implements IMapProvider {
   removeMarker(marker: any): void {
     if (!this.mapInstance || !marker) return;
     this.mapInstance.remove(marker);
-    
+
     // 如果移除的是当前标记，清除保存的位置
     if (marker === this.currentMarker) {
       this.currentMarker = null;
@@ -169,10 +169,10 @@ export class AmapProvider implements IMapProvider {
 
   onMapClick(handler: (lng: number, lat: number) => void): void {
     if (!this.mapInstance) return;
-    
+
     // 保存点击回调
     this.clickHandler = handler;
-    
+
     this.mapInstance.on('click', (e: any) => {
       const { lng, lat } = e.lnglat;
       handler(lng, lat);
@@ -185,7 +185,7 @@ export class AmapProvider implements IMapProvider {
     }
 
     const coordSystem = location.coordinate_system || 'WGS84';
-    
+
     // 如果已经是GCJ-02，直接返回
     if (coordSystem.toLowerCase() === 'gcj-02' || coordSystem.toLowerCase() === 'gcj02') {
       return [location.longitude, location.latitude];
@@ -218,28 +218,28 @@ export class AmapProvider implements IMapProvider {
     // 创建控件容器
     const controlDiv = document.createElement('div');
     controlDiv.className = 'lf-custom-map-type-control lf-map-type-control-offset';
-    controlDiv.innerHTML = t('map.satellite'); // 初始显示"卫星"，因为当前是地图图层
-    
+    controlDiv.textContent = t('map.satellite'); // 初始显示"卫星"，因为当前是地图图层
+
     // 使用简单的状态跟踪，避免复杂的图层检测
     let isCurrentlySatellite = false;
-    
+
     // 添加点击事件
     controlDiv.addEventListener('click', () => {
       try {
-        console.log('Map type control clicked, current state:', isCurrentlySatellite);
-        
+
+
         if (isCurrentlySatellite) {
           // 当前是卫星图，切换到标准地图
-          console.log('Switching to standard layer - recreating map');
+
           try {
             // 直接重渲染地图到标准样式
             const currentCenter = this.mapInstance!.getCenter();
             const currentZoom = this.mapInstance!.getZoom();
             const container = this.mapInstance!.getContainer();
-            
+
             // 销毁当前地图
             this.mapInstance!.destroy();
-            
+
             // 重新创建标准地图
             const AMap = window.AMap;
             this.mapInstance = new AMap.Map(container, {
@@ -251,15 +251,15 @@ export class AmapProvider implements IMapProvider {
               rotateEnable: false,
               resizeEnable: true,
             });
-            
+
             // 重新添加控件
             this.addCustomMapTypeControl();
-            
+
             // 重新添加地图提供商切换控件（如果有多个可用提供商）
             if (this.availableProviders && this.availableProviders.length > 1) {
               this.addProviderSwitcherControl(this.availableProviders);
             }
-            
+
             // 重新绑定点击事件
             if (this.clickHandler) {
               this.mapInstance.on('click', (e: any) => {
@@ -267,7 +267,7 @@ export class AmapProvider implements IMapProvider {
                 this.clickHandler!(lng, lat);
               });
             }
-            
+
             // 重新添加标记点
             if (this.currentMarkerPosition) {
               const { lng, lat, title } = this.currentMarkerPosition;
@@ -280,54 +280,54 @@ export class AmapProvider implements IMapProvider {
               });
               this.mapInstance.add(this.currentMarker);
             }
-            
-            console.log('Successfully switched to standard map by recreation');
+
+
           } catch (error) {
             console.error('Failed to recreate standard map:', error);
           }
-          controlDiv.innerHTML = t('map.satellite'); // 切换到地图后，按钮显示"卫星"
+          controlDiv.textContent = t('map.satellite'); // 切换到地图后，按钮显示"卫星"
           isCurrentlySatellite = false;
         } else {
           // 当前是标准地图，切换到卫星图
-          console.log('Switching to satellite layer');
+
           try {
             // 方法1: 尝试使用图层方式（卫星图层的推荐方式）
             const currentLayers = this.mapInstance!.getLayers();
-            console.log('Current layers before switch:', currentLayers);
-            
+
+
             // 移除当前图层
             if (currentLayers && currentLayers.length > 0) {
               this.mapInstance!.remove(currentLayers);
             }
-            
+
             // 添加卫星图层
             const satelliteLayer = new window.AMap.TileLayer.Satellite();
             this.mapInstance!.add(satelliteLayer);
-            console.log('Successfully switched to satellite layer using TileLayer');
+
           } catch (error1) {
-            console.log('TileLayer method failed, trying setMapStyle:', error1);
+
             try {
               // 方法2: 尝试使用 setMapStyle
               this.mapInstance!.setMapStyle('amap://styles/satellite');
-              console.log('Successfully switched to satellite style');
+
             } catch (error2) {
-              console.log('setMapStyle failed, trying setOptions:', error2);
+
               try {
                 // 方法3: 尝试使用 setOptions
                 this.mapInstance!.setOptions({
                   mapStyle: 'amap://styles/satellite'
                 });
-                console.log('Successfully switched using setOptions');
+
               } catch (error3) {
                 console.error('All methods failed:', error3);
               }
             }
           }
-          controlDiv.innerHTML = t('map.roadmap'); // 切换到卫星后，按钮显示"地图"
+          controlDiv.textContent = t('map.roadmap'); // 切换到卫星后，按钮显示"地图"
           isCurrentlySatellite = true;
         }
-        
-        console.log('New state:', isCurrentlySatellite);
+
+
       } catch (error) {
         console.error('Failed to switch map type:', error);
       }
@@ -353,11 +353,11 @@ export class AmapProvider implements IMapProvider {
     // 创建控件容器
     const controlDiv = document.createElement('div');
     controlDiv.className = 'lf-provider-switcher-control';
-    
+
     // 创建下拉选择框
     const select = document.createElement('select');
     select.className = 'lf-provider-select';
-    
+
     // 添加选项
     availableProviders.forEach(provider => {
       const option = document.createElement('option');
@@ -366,23 +366,23 @@ export class AmapProvider implements IMapProvider {
       option.selected = provider === 'gaode'; // 当前是高德地图
       select.appendChild(option);
     });
-    
+
     // 添加切换事件
     select.addEventListener('change', (event) => {
       const target = event.target as HTMLSelectElement;
       const selectedProvider = target.value;
-      
-      console.log('Amap: Switching to provider:', selectedProvider);
-      
+
+
+
       // 触发自定义事件，通知 MapSelector 切换提供商
       const switchEvent = new CustomEvent('mapProviderSwitch', {
         detail: { provider: selectedProvider }
       });
       window.dispatchEvent(switchEvent);
     });
-    
+
     controlDiv.appendChild(select);
-    
+
     // 直接将控件添加到地图容器（顶部居中）
     try {
       const mapContainer = this.mapInstance.getContainer();
