@@ -19,7 +19,7 @@ export default function Index({ repository, settings, updateSettings }: IndexPro
 
   useEffect(() => {
     loadStories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Reload when the repository changes; loadStories is recreated on each render.
   }, [repository]);
 
   const loadStories = async () => {
