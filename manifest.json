@@ -1,7 +1,7 @@
 {
   "id": "lac-lifeflow",
   "name": "LaC.LifeFlow",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "minAppVersion": "1.7.2",
   "description": "Life as Code - LifeFlow: a timeline plugin to manage and display your life events in a timeline view.",
   "author": "alvinfunborn",

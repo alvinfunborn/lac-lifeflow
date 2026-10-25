@@ -80,10 +80,10 @@ The plugin creates the following files in the specified folder:
   - **Amap**: Use Amap (高德地图) service for China regions
   - **Google Maps**: Use Google Maps service for international regions
 - **Amap Web Service Key**: Amap API key for address search, geocoding, and coordinate conversion
-  - Get your free API key from [Amap Open Platform](https://lbs.amap.com/)
+  - Create your own provider account and API key (billing and usage limits may apply) from [Amap Open Platform](https://lbs.amap.com/)
   - Required features: Web Service API (address search, geocoding)
 - **Google Maps API Key**: Google Maps API key for address search, geocoding, and coordinate conversion
-  - Get your free API key from [Google Open Platform](https://console.cloud.google.com/)
+  - Create your own provider account and API key (billing and usage limits may apply) from [Google Open Platform](https://console.cloud.google.com/)
   - Required features: Maps JavaScript API, Places API, and Geocoding API
 
 ## Installation
@@ -161,7 +161,20 @@ The plugin is developed based on Obsidian Plugin API. Main components:
 
 MIT License
 
+Bundled dependency licenses are reproduced in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) and in the distributed `main.js`.
+
+
 
 ## Privacy and network use
 
-Maps are optional. With provider None, no map service is requested. Enabling Google Maps or AMap loads that provider's remote JavaScript SDK and map tiles, and sends place search queries and coordinates to the selected provider for search, geocoding. These features require your own provider account and API key and may incur provider charges. Notes stay in your vault; map queries are processed by the provider. API keys are saved in local plugin settings (data.json); do not commit or share that file. The plugin does not collect analytics.
+Maps are optional and disabled by default. With provider None, the plugin does not initiate map-service requests. Enabling Google Maps or AMap with your own API keys allows network requests when map views or location features are used.
+
+- Google Maps: loads executable JavaScript from `https://maps.googleapis.com/maps/api/js` and provider-managed assets for maps, markers, place search and geocoding.
+- AMap: loads executable JavaScript from `https://webapi.amap.com/maps` and provider-managed assets. Search, reverse geocoding and coordinate conversion use `https://restapi.amap.com/`.
+- Requests expose your IP address and API key to the selected provider, and send the relevant search terms, map viewport and coordinates. Map services process these queries under their own policies: [Google Privacy Policy](https://policies.google.com/privacy), [AMap Privacy Policy](https://lbs.amap.com/pages/privacy/).
+- These features require a provider account and API key; billing, quotas and charges depend on your provider plan. The directory payment type is **Optional payment**. The plugin does not collect analytics or upload entire note files; selected map data is sent as described above.
+- API keys are stored unencrypted in the vault's plugin settings (`data.json`). Vault backup/sync tools may copy that file. Do not commit or share it; restrict keys and set usage limits with the provider.
+
+The SDKs execute inside Obsidian, rather than in an isolated frame. Fixed loader URLs do not pin all downstream SDK code. Directory approval for this integration is pending; see [the review explanation](docs/community-review.md).
+
+After changing map settings, reopen plugin views. If a map SDK was already loaded and you want to stop its activity, set None and restart Obsidian; already-sent requests cannot be recalled.
